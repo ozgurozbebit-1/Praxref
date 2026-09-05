@@ -121,9 +121,11 @@
 @keyframes finishReveal {
   from {
     opacity: 0.6;
+    transform: scale(0.98);
   }
   to {
     opacity: 1;
+    transform: scale(1);
   }
 }
 .viewport:focus-visible {
@@ -206,6 +208,41 @@
   height: 74px;
   object-fit: contain;
   animation: pickup 1s ease-out both;
+}
+.collectFeedback {
+  position: absolute;
+  z-index: 2;
+  top: calc(34% + 74px);
+  right: 8%;
+  width: 74px;
+  text-align: center;
+  pointer-events: none;
+  color: #ffe1a0;
+  font-size: 19px;
+  font-weight: 700;
+  text-shadow: 0 1px 4px #102737;
+  animation: collectFeedback 0.8s ease-out both;
+}
+.tunnelLift {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(#fff1d3, #c6ece500);
+}
+@keyframes collectFeedback {
+  0% {
+    opacity: 0;
+    transform: translateY(4px) scale(0.94);
+  }
+  20%,
+  65% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px) scale(1);
+  }
 }
 @keyframes pickup {
   0% {
@@ -305,6 +342,9 @@
     animation: none;
   }
   .pickup {
+    animation-name: pickupStill;
+  }
+  .collectFeedback {
     animation-name: pickupStill;
   }
   .progress span {

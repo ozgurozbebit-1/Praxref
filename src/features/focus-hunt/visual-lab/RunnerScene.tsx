@@ -156,7 +156,18 @@ export const RunnerScene = memo(function RunnerScene({
     if (shadow.current) {
       shadow.current.visible = p.y >= 0;
       shadow.current.position.set(p.x, p.y + 0.06, p.z);
-      shadow.current.scale.setScalar(1 + Math.max(0, state.height - p.y) * 0.1);
+      const heightAboveDeck = Math.max(0, state.height - p.y);
+      const landingAccent = reduced ? 0 : state.landing;
+      const shadowSize = 1 + heightAboveDeck * 0.1;
+      shadow.current.scale.set(
+        shadowSize * (1 + landingAccent * 0.5),
+        shadowSize * (1 - landingAccent * 0.4),
+        1,
+      );
+      // Airborne softness and a tiny landing compression; simulation is read-only.
+      (shadow.current.material as THREE.MeshBasicMaterial).opacity = reduced
+        ? 0.24
+        : Math.max(0.12, 0.24 - heightAboveDeck * 0.018) + landingAccent * 0.2;
     }
     if (sun.current) {
       sun.current.position.set(p.x - 12, state.height + 24, p.z + 9);

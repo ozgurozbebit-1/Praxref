@@ -176,6 +176,12 @@ function RunnerSession({
     0,
     Math.min(1, regionAge / 0.15, (1.8 - regionAge) / 0.35),
   );
+  // Visual envelope only: reuse course progress, never a gameplay timer.
+  const tunnelExitAge = hud.elapsed - 520 / COURSE.speed;
+  const tunnelLift =
+    !reduced && tunnelExitAge >= 0 && tunnelExitAge < 0.5
+      ? Math.sin((tunnelExitAge / 0.5) * Math.PI) * 0.045
+      : 0;
   if (phase === "complete" && summary)
     return (
       <section className={styles.results}>
@@ -346,6 +352,13 @@ function RunnerSession({
             </Suspense>
           </Canvas>
         </SceneBoundary>
+        {phase === "running" && tunnelLift > 0 && (
+          <div
+            className={styles.tunnelLift}
+            style={{ opacity: tunnelLift }}
+            aria-hidden="true"
+          />
+        )}
         {phase === "running" && !hud.paused && regionAge < 1.8 && (
           <div
             className={styles.regionNotice}
@@ -404,6 +417,15 @@ function RunnerSession({
               </button>
             </div>
           </div>
+        )}
+        {phase === "running" && hud.pickup > 0 && (
+          <span
+            key={`reward-${hud.pickup}`}
+            className={styles.collectFeedback}
+            aria-hidden="true"
+          >
+            +1
+          </span>
         )}
         {phase === "running" && hud.pickup > 0 && (
           <Image
