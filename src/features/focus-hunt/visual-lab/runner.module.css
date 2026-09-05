@@ -36,7 +36,7 @@
 }
 .hud {
   display: grid;
-  grid-template-columns: 1fr auto auto auto;
+  grid-template-columns: minmax(0, 1fr) auto auto auto auto;
   align-items: center;
   gap: 20px;
   padding: 9px 22px;

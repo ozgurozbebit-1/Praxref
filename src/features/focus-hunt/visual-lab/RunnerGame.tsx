@@ -18,6 +18,7 @@ import { COURSE, pointerLane } from "./course";
 import { createLabRuntime } from "./runtime";
 import { RunnerScene } from "./RunnerScene";
 import styles from "./runner.module.css";
+import { createGameAudio } from "./audio-feedback";
 
 // Presentation landmarks only; these do not create gameplay checkpoints.
 const REGIONS = [
@@ -89,6 +90,9 @@ function RunnerSession({
   development: boolean;
 }) {
   const runtimeRef = useRef(createLabRuntime(audience));
+  const [audio] = useState(createGameAudio);
+  const [muted, setMuted] = useState(false);
+  useEffect(() => () => audio.dispose(), [audio]);
   const [summary, setSummary] = useState<FocusHuntSessionSummary | null>(null);
   const [phase, setPhase] = useState<
     "loading" | "intro" | "running" | "complete"
@@ -112,6 +116,14 @@ function RunnerSession({
   );
   const onUpdate = useCallback(() => {
     const runtime = runtimeRef.current;
+    audio.observe({
+      pickup: runtime.fx.id,
+      airborne: runtime.runner.airborne,
+      distance: runtime.runner.distance,
+      finished: runtime.runner.finished,
+      paused: runtime.paused,
+    });
+    if (runtime.paused) audio.silence();
     setHud({
       elapsed: runtime.runner.elapsed,
       stars: runtime.session.rewardStars,
@@ -123,7 +135,7 @@ function RunnerSession({
       paused: runtime.paused,
       jumps: runtime.runner.jumps,
     });
-  }, []);
+  }, [audio]);
   const onFinish = useCallback(() => {
     setSummary(runtimeRef.current.summary);
     setPhase("complete");
@@ -160,6 +172,7 @@ function RunnerSession({
     };
   }, [pause]);
   const start = () => {
+    audio.unlock();
     const runtime = runtimeRef.current;
     runtime.running = true;
     runtime.paused = false;
@@ -256,6 +269,17 @@ function RunnerSession({
           {Math.ceil(COURSE.seconds - hud.elapsed)} sn
         </span>
         <span aria-label="Toplanan altın yıldız">✦ {hud.stars}</span>
+        <button
+          aria-label={muted ? "Sesi aç" : "Sesi kapat"}
+          aria-pressed={muted}
+          onClick={() => {
+            audio.setMuted(!muted);
+            setMuted(!muted);
+            if (muted) audio.unlock();
+          }}
+        >
+          <span aria-hidden="true">{muted ? "🔇" : "🔊"}</span>
+        </button>
         <button
           disabled={phase !== "running"}
           onClick={pause}
@@ -408,6 +432,7 @@ function RunnerSession({
               <h2>Parkur duraklatıldı</h2>
               <button
                 onClick={() => {
+                  audio.unlock();
                   runtimeRef.current.paused = false;
                   viewport.current?.focus();
                   onUpdate();
