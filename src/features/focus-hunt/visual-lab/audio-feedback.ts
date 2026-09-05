@@ -1,7 +1,8 @@
 export type AudioCue =
-  "pickup" | "takeoff" | "landing" | "enter" | "exit" | "finish";
+  "pickup" | "error" | "takeoff" | "landing" | "enter" | "exit" | "finish";
 export type AudioSnapshot = {
   pickup: number;
+  incorrectTrialId?: string;
   airborne: boolean;
   distance: number;
   finished: boolean;
@@ -14,11 +15,16 @@ export function createCueObserver(play: (cue: AudioCue) => void) {
     airborne = false,
     distance = 0,
     finished = false;
+  let incorrectTrialId: string | undefined;
   return (next: AudioSnapshot) => {
     const emit = (cue: AudioCue) => {
       if (!next.paused) play(cue);
     };
     if (next.pickup > pickup) emit("pickup");
+    if (next.incorrectTrialId && next.incorrectTrialId !== incorrectTrialId) {
+      emit("error");
+      incorrectTrialId = next.incorrectTrialId;
+    }
     if (next.airborne && !airborne) emit("takeoff");
     if (!next.airborne && airborne) emit("landing");
     if (distance < 436 && next.distance >= 436) emit("enter");
@@ -31,13 +37,15 @@ export function createCueObserver(play: (cue: AudioCue) => void) {
   };
 }
 
+const MASTER_GAIN = 0.27;
 const tones: Record<AudioCue, readonly [number, number, number, number]> = {
-  pickup: [880, 1320, 0.2, 0.25],
-  takeoff: [140, 420, 0.24, 0.16],
-  landing: [120, 55, 0.16, 0.16],
-  enter: [220, 165, 0.4, 0.1],
-  exit: [330, 440, 0.35, 0.12],
-  finish: [523, 784, 0.9, 0.3],
+  pickup: [880, 1320, 0.2, 0.4],
+  error: [190, 95, 0.22, 0.35],
+  takeoff: [140, 420, 0.24, 0.28],
+  landing: [120, 55, 0.16, 0.28],
+  enter: [220, 165, 0.4, 0.22],
+  exit: [330, 440, 0.35, 0.24],
+  finish: [523, 784, 0.9, 0.45],
 };
 
 export function createGameAudio(
@@ -105,7 +113,8 @@ export function createGameAudio(
           context = contextFactory();
           if (!context) return;
           master = context.createGain();
-          master.gain.value = 0.18; // Four simultaneous voices remain conservatively quiet.
+          // Worst-case sine peak: 4 * 0.45 * 0.27 = 0.486 (< 1).
+          master.gain.value = MASTER_GAIN;
           master.connect(context.destination);
         }
         if (context.state === "suspended")
@@ -116,7 +125,7 @@ export function createGameAudio(
     },
     setMuted(value: boolean) {
       muted = value;
-      if (master) master.gain.value = value ? 0 : 0.18;
+      if (master) master.gain.value = value ? 0 : MASTER_GAIN;
       if (value) silence();
     },
     silence,

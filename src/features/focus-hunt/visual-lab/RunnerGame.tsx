@@ -116,8 +116,12 @@ function RunnerSession({
   );
   const onUpdate = useCallback(() => {
     const runtime = runtimeRef.current;
+    const lastTrial = runtime.session.trials.at(-1);
     audio.observe({
       pickup: runtime.fx.id,
+      // Read the engine's existing classification; omissions are not errors here.
+      incorrectTrialId:
+        lastTrial?.errorType === "commission" ? lastTrial.trialId : undefined,
       airborne: runtime.runner.airborne,
       distance: runtime.runner.distance,
       finished: runtime.runner.finished,
