@@ -14,10 +14,20 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import type { FocusHuntAudience, FocusHuntSessionSummary } from "../types";
-import { COURSE, COURSE_SECTIONS, pointerLane } from "./course";
+import { COURSE, pointerLane } from "./course";
 import { createLabRuntime } from "./runtime";
 import { RunnerScene } from "./RunnerScene";
 import styles from "./runner.module.css";
+
+// Presentation landmarks only; these do not create gameplay checkpoints.
+const REGIONS = [
+  { at: 0, name: "Başlangıç Adası", hint: "Adalar rotası" },
+  { at: 108, name: "Mercan Geçidi", hint: "Kıyı boyunca" },
+  { at: 218, name: "Rüzgâr Rampası", hint: "Adalar arasında" },
+  { at: 436, name: "Atlas Tüneli", hint: "Rotayı takip et" },
+  { at: 650, name: "Yıldız Burnu", hint: "Açık denize doğru" },
+  { at: 864, name: "Son Ada", hint: "Atlas bitiş kapısı" },
+] as const;
 
 function useMedia(query: string) {
   const subscribe = useCallback(
@@ -156,13 +166,24 @@ function RunnerSession({
     setPhase("running");
     viewport.current?.focus();
   };
+  const region = REGIONS.reduce(
+    (current, candidate) =>
+      hud.elapsed * COURSE.speed >= candidate.at ? candidate : current,
+    REGIONS[0] as (typeof REGIONS)[number],
+  );
+  const regionAge = hud.elapsed - region.at / COURSE.speed;
+  const regionOpacity = Math.max(
+    0,
+    Math.min(1, regionAge / 0.15, (1.8 - regionAge) / 0.35),
+  );
   if (phase === "complete" && summary)
     return (
       <section className={styles.results}>
         <p className={styles.eyebrow}>
           {development ? "PRAXREF · VISUAL LAB" : "PRAXREF · ATLAS ADALARI"}
         </p>
-        <h1>Görev tamamlandı</h1>
+        <h1 className={styles.finishTitle}>ATLAS ADALARI TAMAMLANDI</h1>
+        <p>Görev tamamlandı</p>
         <p>Atlas bitiş kapısına ulaştın. {hud.stars} altın yıldız topladın.</p>
         <div className={styles.metrics}>
           <div>
@@ -224,9 +245,7 @@ function RunnerSession({
         </Link>
       </header>
       <div className={styles.hud}>
-        <span>
-          {COURSE_SECTIONS[Math.min(8, Math.floor(hud.elapsed / 6))].name}
-        </span>
+        <span className={styles.regionLabel}>{region.name}</span>
         <span aria-label="Kalan süre">
           {Math.ceil(COURSE.seconds - hud.elapsed)} sn
         </span>
@@ -327,6 +346,15 @@ function RunnerSession({
             </Suspense>
           </Canvas>
         </SceneBoundary>
+        {phase === "running" && !hud.paused && regionAge < 1.8 && (
+          <div
+            className={styles.regionNotice}
+            style={{ opacity: regionOpacity }}
+          >
+            <strong>{region.name.toLocaleUpperCase("tr-TR")}</strong>
+            <span>{region.hint}</span>
+          </div>
+        )}
         {phase === "loading" && (
           <div className={styles.overlay}>
             <p>Atlas parkuru yükleniyor…</p>

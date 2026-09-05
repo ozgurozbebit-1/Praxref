@@ -322,6 +322,77 @@ function Islands() {
   );
 }
 
+/** Fixed scenery outside the driving corridor; no interaction or collision. */
+function CoastalMarkers() {
+  const lighthouse = trackPoint(530, -30);
+  return (
+    <group>
+      <group position={[lighthouse.x, 0, lighthouse.z]}>
+        <mesh position={[0, 0.2, 0]} scale={[4, 1.4, 3]}>
+          <dodecahedronGeometry args={[1, 0]} />
+          <meshStandardMaterial color="#789190" roughness={0.9} />
+        </mesh>
+        <mesh position={[0, 5, 0]}>
+          <cylinderGeometry args={[0.9, 1.5, 9, 8]} />
+          <meshStandardMaterial color="#e8ddbe" roughness={0.75} />
+        </mesh>
+        <mesh position={[0, 9.8, 0]}>
+          <cylinderGeometry args={[1.2, 1.2, 1, 8]} />
+          <meshStandardMaterial
+            color="#cce4d9"
+            emissive="#eac886"
+            emissiveIntensity={0.25}
+          />
+        </mesh>
+        <mesh position={[0, 10.8, 0]}>
+          <coneGeometry args={[1.7, 1.1, 8]} />
+          <meshStandardMaterial color="#264b60" roughness={0.65} />
+        </mesh>
+      </group>
+      {[90, 180, 340, 530, 700, 900].map((at, i) => {
+        const p = trackPoint(at, i % 2 ? 11 : -11);
+        return (
+          <group key={at} position={[p.x, 0.25, p.z]}>
+            <mesh>
+              <cylinderGeometry args={[0.5, 0.8, 0.6, 8]} />
+              <meshStandardMaterial color="#506e7b" roughness={0.8} />
+            </mesh>
+            <mesh position={[0, 0.9, 0]}>
+              <cylinderGeometry args={[0.1, 0.14, 1.3, 6]} />
+              <meshStandardMaterial color="#d9c49c" roughness={0.8} />
+            </mesh>
+          </group>
+        );
+      })}
+      {RAMPS.map((ramp, index) => {
+        const p = trackPoint(ramp.start - 4, 5.3);
+        return (
+          <group
+            key={ramp.start}
+            position={[p.x, p.y, p.z]}
+            rotation={[0, -p.yaw, 0]}
+          >
+            <mesh position={[0, 1.1, 0]}>
+              <cylinderGeometry args={[0.06, 0.06, 2.2, 6]} />
+              <meshStandardMaterial color="#a5babd" />
+            </mesh>
+            <mesh position={[0.55, 1.75, 0]}>
+              <planeGeometry args={[1.1, 0.7]} />
+              <meshStandardMaterial color="#244659" side={THREE.DoubleSide} />
+            </mesh>
+            {Array.from({ length: index + 1 }, (_, bar) => (
+              <mesh key={bar} position={[0.25 + bar * 0.28, 1.75, 0.012]}>
+                <planeGeometry args={[0.09, 0.42]} />
+                <meshBasicMaterial color="#e9c882" side={THREE.DoubleSide} />
+              </mesh>
+            ))}
+          </group>
+        );
+      })}
+    </group>
+  );
+}
+
 export function TrackWorld({ reduced = false }: { reduced?: boolean }) {
   const landmark = trackPoint(920, 36);
   return (
@@ -337,6 +408,7 @@ export function TrackWorld({ reduced = false }: { reduced?: boolean }) {
       />
       <Sea reduced={reduced} />
       <Islands />
+      <CoastalMarkers />
       <RampMarkings />
       {COURSE_SECTIONS.map((_, i) => (
         <TrackSegment key={i} index={i} />
