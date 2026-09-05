@@ -1,7 +1,7 @@
 .game,
 .results {
   color: #e5f2f3;
-  background: #112938;
+  background: linear-gradient(145deg, #193a4b, #102737);
   border-radius: 18px;
   overflow: hidden;
   margin: 12px auto;
@@ -14,6 +14,7 @@
   align-items: center;
   gap: 16px;
   padding: 14px 22px;
+  border-bottom: 1px solid #bce7e61a;
 }
 .header h1 {
   color: #f1fbfa;
@@ -39,9 +40,14 @@
   align-items: center;
   gap: 20px;
   padding: 9px 22px;
-  background: #173746;
+  background: #153443;
+  color: #eaf7f5;
   font-size: 13px;
   font-variant-numeric: tabular-nums;
+}
+.hud span:nth-child(2) {
+  font-weight: 700;
+  letter-spacing: 0.03em;
 }
 .hud span:nth-child(3) {
   color: #ffd15c;
@@ -64,7 +70,7 @@
 .progress span {
   display: block;
   height: 100%;
-  background: #67d8c6;
+  background: linear-gradient(90deg, #67d8c6, #f3ce80);
   transition: width 0.1s linear;
 }
 .viewport {
@@ -73,7 +79,7 @@
   min-height: 340px;
   touch-action: none;
   outline-offset: -3px;
-  background: #abdce6;
+  background: #b9dfe5;
 }
 .viewport canvas {
   display: block;
@@ -211,6 +217,7 @@
   padding: 18px 10px;
   border-radius: 12px;
   background: #214452;
+  border: 1px solid #8dd9d326;
 }
 .metrics strong {
   display: block;

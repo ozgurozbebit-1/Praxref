@@ -1,14 +1,90 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useFrame } from "@react-three/fiber";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import {
   COURSE,
   COURSE_SECTIONS,
+  RAMPS,
   deckHeight,
   trackPoint,
   visualRandom,
 } from "./course";
+
+/** Static vertex colours/normals give depth without textures or a water shader. */
+function Sea({ reduced }: { reduced: boolean }) {
+  const material = useRef<THREE.MeshStandardMaterial>(null);
+  const geometry = useMemo(() => {
+    const surface = new THREE.PlaneGeometry(1600, 1600, 64, 64);
+    const positions = surface.attributes.position;
+    const colours = new Float32Array(positions.count * 3);
+    const deep = new THREE.Color("#147c98");
+    const shallow = new THREE.Color("#43baaf");
+    const colour = new THREE.Color();
+    for (let i = 0; i < positions.count; i++) {
+      const x = positions.getX(i),
+        y = positions.getY(i);
+      const wave = Math.sin(x * 0.12 + y * 0.07) * Math.cos(y * 0.09);
+      positions.setZ(i, wave * 0.12);
+      colour.copy(deep).lerp(shallow, 0.35 + 0.22 * wave);
+      colour.toArray(colours, i * 3);
+    }
+    surface.setAttribute("color", new THREE.BufferAttribute(colours, 3));
+    surface.computeVertexNormals();
+    return surface;
+  }, []);
+  useEffect(() => () => geometry.dispose(), [geometry]);
+  useFrame(({ clock }) => {
+    if (material.current)
+      material.current.roughness = reduced
+        ? 0.4
+        : 0.4 + Math.sin(clock.elapsedTime * 0.45) * 0.025;
+  });
+  return (
+    <mesh
+      geometry={geometry}
+      rotation={[-Math.PI / 2, 0, 0]}
+      position={[0, -0.22, -460]}
+      receiveShadow
+    >
+      <meshStandardMaterial
+        ref={material}
+        vertexColors
+        metalness={0.18}
+        roughness={0.4}
+      />
+    </mesh>
+  );
+}
+
+function RampMarkings() {
+  const strips = useMemo(
+    () =>
+      RAMPS.flatMap((ramp) =>
+        [-1, 1].map((side) =>
+          roadGeometry(
+            ramp.start,
+            ramp.crest,
+            side < 0 ? -3.6 : 3.4,
+            side < 0 ? -3.4 : 3.6,
+            0.06,
+          ),
+        ),
+      ),
+    [],
+  );
+  useEffect(() => () => strips.forEach((g) => g.dispose()), [strips]);
+  return (
+    <group>
+      {strips.map((geometry, i) => (
+        <mesh key={i} geometry={geometry}>
+          <meshBasicMaterial color="#ffd17a" />
+        </mesh>
+      ))}
+    </group>
+  );
+}
 
 function roadGeometry(
   start: number,
@@ -53,16 +129,16 @@ function TrackSegment({ index }: { index: number }) {
     <group>
       <mesh geometry={geometry[0]} receiveShadow>
         <meshStandardMaterial
-          color={index % 2 ? "#30607d" : "#274e6b"}
-          roughness={0.72}
-          metalness={0.15}
+          color={index % 2 ? "#244659" : "#203c53"}
+          roughness={0.58}
+          metalness={0.2}
           side={THREE.DoubleSide}
         />
       </mesh>
       {geometry.slice(1).map((g, i) => (
         <mesh key={i} geometry={g}>
           <meshStandardMaterial
-            color="#f0c278"
+            color="#f5d49b"
             emissive="#f4a12a"
             emissiveIntensity={0.12}
             roughness={0.45}
@@ -130,6 +206,23 @@ function Gate({ at, finish = false }: { at: number; finish?: boolean }) {
         <meshBasicMaterial color="#31dfcd" />
       </mesh>
       {finish &&
+        [-1, 1].map((side) => (
+          <group key={side} position={[side * 5.6, 5.5, 0]}>
+            <mesh position={[0, 1, 0]}>
+              <cylinderGeometry args={[0.07, 0.07, 3, 6]} />
+              <meshStandardMaterial color="#f9deb0" />
+            </mesh>
+            <mesh position={[side * 0.8, 1.8, 0]}>
+              <planeGeometry args={[1.6, 0.85]} />
+              <meshStandardMaterial
+                color="#eeb956"
+                side={THREE.DoubleSide}
+                roughness={0.8}
+              />
+            </mesh>
+          </group>
+        ))}
+      {finish &&
         Array.from({ length: 16 }, (_, i) => (
           <mesh
             key={i}
@@ -163,10 +256,14 @@ function Islands() {
     <group>
       {islands.map((p, i) => (
         <group key={i} position={[p.x, -1.2, p.z]} rotation={[0, p.angle, 0]}>
-          <mesh scale={[p.size, 3, p.size * 1.2]} castShadow receiveShadow>
+          <mesh
+            scale={[p.size, i % 4 === 3 ? 6.5 : 3, p.size * 1.2]}
+            castShadow
+            receiveShadow
+          >
             <dodecahedronGeometry args={[1, 0]} />
             <meshStandardMaterial
-              color="#dab886"
+              color={["#627c87", "#b49d7f", "#ebd8af", "#586b7e"][i % 4]}
               roughness={0.92}
               flatShading
             />
@@ -178,27 +275,59 @@ function Islands() {
           >
             <dodecahedronGeometry args={[1, 0]} />
             <meshStandardMaterial
-              color={i % 2 ? "#48a78a" : "#72bb8c"}
+              color={["#829e97", "#53a78a", "#f2dfb4", "#71908c"][i % 4]}
               roughness={0.9}
               flatShading
             />
           </mesh>
-          <mesh position={[0, 4.3, 0]} rotation={[0, i, 0]} castShadow>
-            <coneGeometry args={[1.1, 4, 5]} />
-            <meshStandardMaterial color="#206e6e" roughness={0.85} />
-          </mesh>
+          {i % 4 === 1 ? (
+            <group position={[0, 2.6, 0]}>
+              <mesh position={[0, 1.6, 0]} rotation={[0, 0, 0.12]} castShadow>
+                <cylinderGeometry args={[0.13, 0.24, 3.2, 6]} />
+                <meshStandardMaterial color="#977652" roughness={0.9} />
+              </mesh>
+              {[0, 1, 2, 3].map((leaf) => (
+                <mesh
+                  key={leaf}
+                  position={[0.2, 3.3, 0]}
+                  rotation={[0, (leaf * Math.PI) / 2, 0.2]}
+                  scale={[2.2, 0.16, 0.65]}
+                >
+                  <octahedronGeometry args={[1, 0]} />
+                  <meshStandardMaterial color="#267c67" roughness={0.85} />
+                </mesh>
+              ))}
+            </group>
+          ) : (
+            i % 4 !== 2 && (
+              <mesh
+                position={[0, i % 4 === 3 ? 5 : 2.6, 0]}
+                rotation={[0.15, i, 0.2]}
+                castShadow
+              >
+                <coneGeometry
+                  args={[i % 4 === 3 ? 2 : 1.5, i % 4 === 3 ? 7 : 2, 5]}
+                />
+                <meshStandardMaterial
+                  color="#607985"
+                  roughness={0.88}
+                  flatShading
+                />
+              </mesh>
+            )
+          )}
         </group>
       ))}
     </group>
   );
 }
 
-export function TrackWorld() {
+export function TrackWorld({ reduced = false }: { reduced?: boolean }) {
   const landmark = trackPoint(920, 36);
   return (
     <>
-      <color attach="background" args={["#abdce6"]} />
-      <fog attach="fog" args={["#abdce6", 55, 190]} />
+      <color attach="background" args={["#b9dfe5"]} />
+      <fog attach="fog" args={["#b9dfe5", 55, 190]} />
       <hemisphereLight args={["#dbf6ff", "#659ca0", 1.5]} />
       {/* Ship-local shadow light follows the player in RunnerScene. */}
       <directionalLight
@@ -206,23 +335,13 @@ export function TrackWorld() {
         color="#fff1cc"
         intensity={2.2}
       />
-      <mesh
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -0.05, -460]}
-        receiveShadow
-      >
-        <planeGeometry args={[1600, 1600]} />
-        <meshStandardMaterial
-          color="#168d9f"
-          metalness={0.22}
-          roughness={0.32}
-        />
-      </mesh>
+      <Sea reduced={reduced} />
       <Islands />
+      <RampMarkings />
       {COURSE_SECTIONS.map((_, i) => (
         <TrackSegment key={i} index={i} />
       ))}
-      {[2, 326, 350, 374, 855].map((at) => (
+      {[2, 326, 350, 374, 436, 520, 855].map((at) => (
         <Gate key={at} at={at} />
       ))}
       <Gate at={COURSE.length} finish />
@@ -244,6 +363,12 @@ export function TrackWorld() {
                 roughness={0.6}
               />
             </mesh>
+            {[-1, 1].map((side) => (
+              <mesh key={side} position={[side * 4.75, 2.2, 0]}>
+                <boxGeometry args={[0.08, 0.12, 5.4]} />
+                <meshBasicMaterial color="#8cd8d7" />
+              </mesh>
+            ))}
           </group>
         );
       })}

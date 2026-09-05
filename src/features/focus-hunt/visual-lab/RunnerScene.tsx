@@ -46,7 +46,7 @@ function cloneModel(scene: THREE.Group, size: number, color?: string) {
         if (color) {
           material.color.set(color);
           material.emissive.set(color);
-          material.emissiveIntensity = 0.24;
+          material.emissiveIntensity = color === colors[0] ? 0.42 : 0.3;
         }
       }
       materials.push(material);
@@ -246,12 +246,12 @@ export const RunnerScene = memo(function RunnerScene({
 
   return (
     <>
-      <TrackWorld />
+      <TrackWorld reduced={reduced} />
       {!lowQuality && (
         <directionalLight
           ref={sun}
           castShadow
-          intensity={0.6}
+          intensity={0.75}
           color="#fff2d2"
           shadow-mapSize={[1024, 1024]}
           shadow-camera-left={-16}
