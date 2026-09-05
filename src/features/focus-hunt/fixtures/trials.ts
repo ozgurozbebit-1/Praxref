@@ -1,0 +1,6 @@
+import type { FocusHuntTrial } from "../types";
+export function trial(overrides: Partial<FocusHuntTrial> = {}): FocusHuntTrial { return { trialId: "trial-1", sessionId: "session-1", audience: "kids", difficultyLevel: 2, stimulusType: "star", isTarget: true, appearedAt: 1000, respondedAt: 1400, reactionTimeMs: 400, reactionTimeQualityFlag: null, responded: true, correct: true, errorType: null, ...overrides }; }
+export const perfectSession = Array.from({ length: 10 }, (_, index) => trial({ trialId: `perfect-${index}`, isTarget: index < 6, stimulusType: index < 6 ? "star" : "circle", responded: index < 6, correct: true, respondedAt: index < 6 ? 1400 + index * 10 : null, reactionTimeMs: index < 6 ? 400 + index * 10 : null }));
+export const distractedSession = Array.from({ length: 10 }, (_, index) => trial({ trialId: `distracted-${index}`, isTarget: true, responded: false, respondedAt: null, reactionTimeMs: null, correct: false, errorType: "omission" }));
+export const impulsiveSession = Array.from({ length: 10 }, (_, index) => trial({ trialId: `impulsive-${index}`, isTarget: false, stimulusType: "circle", responded: true, correct: false, errorType: "commission" }));
+export const unstableRtSession = [300, 700, 310, 690, 320].map((reactionTimeMs, index) => trial({ trialId: `unstable-${index}`, reactionTimeMs, respondedAt: 1000 + reactionTimeMs }));

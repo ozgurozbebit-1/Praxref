@@ -1,0 +1,1 @@
+import { Shell } from "@/components/shell"; import { SelectiveAttentionGame } from "@/features/selective-attention/components/selective-attention-game"; export default function SelectiveAttention() { return <Shell play><SelectiveAttentionGame audience="kids" /></Shell>; }

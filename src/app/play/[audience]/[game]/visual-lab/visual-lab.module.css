@@ -1,0 +1,73 @@
+.lab {
+  color: #e0e9f5;
+  background: radial-gradient(ellipse at top, #1b2c43, #090f1d 65%);
+  border-radius: 12px;
+  padding: 12px 0;
+}
+/* Retain the original canvas dimensions/aspect to preserve target projection. */
+.lab :global(.focus-game) {
+  border-color: transparent;
+  border-radius: 10px;
+  background: transparent;
+  box-shadow: none;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.lab :global(.focus-game h1) {
+  color: #e6eff9;
+}
+.lab :global(.focus-game > p:not(.eyebrow)) {
+  color: #b2c4d6;
+}
+.lab :global(.space-hud) {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 4px 0;
+  gap: 8px;
+  font-weight: 500;
+}
+.lab :global(.space-field) {
+  border-radius: 6px;
+  overflow: visible;
+  margin-top: 42px;
+}
+.lab :global(.focus-3d-canvas) {
+  overflow: hidden;
+  border-radius: 6px;
+}
+.lab :global(.space-field .focus-game__hint) {
+  top: -30px;
+  font-size: 12px;
+  line-height: 18px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #b1c6d8;
+  pointer-events: none;
+}
+.lab :global(.atlas-cockpit) {
+  display: none;
+}
+.lab :global(.focus-game__summary span) {
+  background: #16243a;
+  color: #d7e6f3;
+  border-color: #2b4058;
+}
+.lab :global(.focus-game > small) {
+  color: #a0b5ca;
+}
+@media (max-width: 560px) {
+  .lab :global(.space-hud) {
+    grid-template-columns: 1fr repeat(3, auto);
+    font-size: 10px;
+    gap: 5px;
+  }
+  .lab :global(.space-hud span) {
+    letter-spacing: 0;
+  }
+  .lab :global(.space-hud b) {
+    padding-left: 5px;
+  }
+}

@@ -1,0 +1,1 @@
+import { Shell } from "@/components/shell"; import { InhibitionGame } from "@/features/inhibition/components/inhibition-game"; export default function Inhibition() { return <Shell play><InhibitionGame audience="kids" /></Shell>; }

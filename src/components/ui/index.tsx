@@ -1,0 +1,22 @@
+import type { ButtonHTMLAttributes, ReactNode } from "react";
+
+export type Tone = "teal" | "coral" | "lilac" | "gold" | "success" | "warning" | "danger" | "neutral";
+
+export function Button({ children, variant = "primary", className = "", ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "secondary" | "ghost" }) {
+  return <button className={`button button--${variant} ${className}`} {...props}>{children}</button>;
+}
+export function Card({ children, className = "" }: { children: ReactNode; className?: string }) { return <article className={`card ${className}`}>{children}</article>; }
+export function Badge({ children, tone = "neutral" }: { children: ReactNode; tone?: Tone }) { return <span className={`badge badge--${tone}`}>{children}</span>; }
+export function ProgressBar({ value, label }: { value: number; label?: string }) { return <div className="progress" aria-label={label ?? `İlerleme yüzde ${value}`}><span style={{ width: `${Math.max(0, Math.min(value, 100))}%` }} /></div>; }
+export function MetricCard({ label, value, detail, tone = "teal" }: { label: string; value: string; detail: string; tone?: Tone }) { return <Card className="metric-card"><span className={`metric-card__mark metric-card__mark--${tone}`} /><p>{label}</p><strong>{value}</strong><small>{detail}</small></Card>; }
+export function StatPill({ label, value, tone = "teal" }: { label: string; value: string; tone?: Tone }) { return <span className={`stat-pill stat-pill--${tone}`}><b>{value}</b>{label}</span>; }
+export function SectionHeader({ eyebrow, title, description, action }: { eyebrow?: string; title: string; description?: string; action?: ReactNode }) { return <div className="section-header"><div>{eyebrow && <p className="eyebrow">{eyebrow}</p>}<h2>{title}</h2>{description && <p className="muted">{description}</p>}</div>{action}</div>; }
+export function EmptyState({ title, description }: { title: string; description: string }) { return <Card className="empty-state"><span aria-hidden="true">○</span><h2>{title}</h2><p>{description}</p></Card>; }
+export function Avatar({ initials, tone = "teal" }: { initials: string; tone?: Tone }) { return <span className={`avatar avatar--${tone}`} aria-label={initials}>{initials}</span>; }
+export function Tabs({ items, active = 0 }: { items: string[]; active?: number }) { return <div className="tabs" role="tablist">{items.map((item, index) => <button key={item} role="tab" aria-selected={active === index} className={active === index ? "is-active" : ""}>{item}</button>)}</div>; }
+export function Alert({ title, children, tone = "warning" }: { title: string; children: ReactNode; tone?: "warning" | "success" | "danger" }) { return <aside className={`alert alert--${tone}`}><b>{title}</b><span>{children}</span></aside>; }
+export function PageHeader({ eyebrow, title, description, action }: { eyebrow: string; title: string; description?: string; action?: ReactNode }) { return <div className="page-header"><div><p className="eyebrow">{eyebrow}</p><h1>{title}</h1>{description && <p className="muted">{description}</p>}</div>{action}</div>; }
+export function TrendIndicator({ label, direction = "up" }: { label: string; direction?: "up" | "flat" | "down" }) { const icon = direction === "up" ? "↗" : direction === "down" ? "↘" : "→"; return <span className={`trend-indicator trend-indicator--${direction}`}>{icon} {label}</span>; }
+export function DataTable({ headers, children }: { headers: string[]; children: ReactNode }) { return <div className="table-wrap"><table><thead><tr>{headers.map(header => <th key={header}>{header}</th>)}</tr></thead><tbody>{children}</tbody></table></div>; }
+export function Score({ name, value }: { name: string; value: number }) { return <Card className="score"><div><span>{name}</span><strong>{value}</strong></div><ProgressBar value={value} label={`${name}: ${value}`} /><small>Başlangıca göre görünüm</small></Card>; }
+export function Trend({ values }: { values: number[] }) { const points = values.map((value, index) => `${index * 46 + 10},${100 - value}`).join(" "); return <div className="trend"><svg viewBox="0 0 300 110" role="img" aria-label="Yedi günlük dikkat trendi"><polyline points={points} />{values.map((value, index) => <circle key={index} cx={index * 46 + 10} cy={100 - value} r="4" />)}</svg><div>{["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"].map(day => <span key={day}>{day}</span>)}</div></div>; }

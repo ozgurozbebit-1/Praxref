@@ -1,0 +1,3 @@
+import type { CognitiveDomainScore } from "@/lib/protocol/cognitive-domain";
+const labels = { sustainedAttention: "Odak Sürekliliği", selectiveAttention: "Seçici Dikkat", inhibition: "İnhibisyon Kontrolü", workingMemory: "Çalışma Belleği" };
+export function createRuleBasedSummary(scores: CognitiveDomainScore[]) { return scores.map(score => score.confidence === "insufficient" ? `${labels[score.domain]} için henüz yeterli yerel oyun verisi yok.` : score.trend === "improving" ? `${labels[score.domain]} son oyun oturumlarında yükseliyor.` : score.trend === "declining" ? `${labels[score.domain]} son oturumlarda değişken görünüyor.` : `${labels[score.domain]} son oturumlarda stabil görünüyor.`); }

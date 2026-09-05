@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local pnpm store
+/.pnpm-store/
+
+# Prisma client generated from the tracked schema
+/src/generated/prisma/

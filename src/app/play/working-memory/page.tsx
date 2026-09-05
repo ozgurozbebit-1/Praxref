@@ -1,0 +1,1 @@
+import { Shell } from "@/components/shell"; import { WorkingMemoryGame } from "@/features/working-memory/components/working-memory-game"; export default function WorkingMemory() { return <Shell play><WorkingMemoryGame audience="kids" /></Shell>; }
