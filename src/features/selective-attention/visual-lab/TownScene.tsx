@@ -337,37 +337,93 @@ function TownWalker({
   reduced: boolean;
 }) {
   const group = useRef<Group>(null);
+  const leftArm = useRef<Group>(null);
+  const rightArm = useRef<Group>(null);
+  const leftLeg = useRef<Group>(null);
+  const rightLeg = useRef<Group>(null);
+
   useFrame(({ clock }) => {
-    if (!group.current || reduced) return;
-    const t = (Math.sin(clock.elapsedTime * 0.32 + phase) + 1) / 2;
+    if (!group.current) return;
+    if (reduced) {
+      leftArm.current?.rotation.set(0, 0, 0);
+      rightArm.current?.rotation.set(0, 0, 0);
+      leftLeg.current?.rotation.set(0, 0, 0);
+      rightLeg.current?.rotation.set(0, 0, 0);
+      return;
+    }
+
+    const speed = 0.48; // ~50% faster than the previous 0.32 pace.
+    const cycle = clock.elapsedTime * speed + phase;
+    const t = (Math.sin(cycle) + 1) / 2;
     const [a, b] = path;
     group.current.position.set(
       a[0] + (b[0] - a[0]) * t,
       a[1] + (b[1] - a[1]) * t,
       a[2] + (b[2] - a[2]) * t,
     );
-    group.current.rotation.y = Math.cos(clock.elapsedTime * 0.32 + phase) >= 0 ? 0 : Math.PI;
+    group.current.rotation.y = Math.cos(cycle) >= 0 ? 0 : Math.PI;
+
+    const stride = Math.sin(clock.elapsedTime * 4.8 + phase) * 0.42;
+    if (leftArm.current) leftArm.current.rotation.x = stride;
+    if (rightArm.current) rightArm.current.rotation.x = -stride;
+    if (leftLeg.current) leftLeg.current.rotation.x = -stride * 0.72;
+    if (rightLeg.current) rightLeg.current.rotation.x = stride * 0.72;
   });
+
+  const skin = "#d9ad88";
+  const hair = "#4d4038";
+  const trousers = "#53666d";
+  const shoes = "#39484d";
+
   return (
-    <group ref={group} position={path[0]} scale={0.72}>
-      <mesh position={[0, 1.72, 0]} castShadow>
-        <sphereGeometry args={[0.26, 12, 10]} />
-        <meshStandardMaterial color="#d7a67e" roughness={0.9} />
+    <group ref={group} position={path[0]} scale={0.82}>
+      <mesh position={[0, 2.0, 0]} castShadow>
+        <sphereGeometry args={[0.28, 14, 12]} />
+        <meshStandardMaterial color={skin} roughness={0.92} />
       </mesh>
-      <mesh position={[0, 1.08, 0]} castShadow>
-        <capsuleGeometry args={[0.27, 0.72, 5, 10]} />
+      <mesh position={[0, 2.19, -0.03]} scale={[1.02, 0.55, 1.02]} castShadow>
+        <sphereGeometry args={[0.29, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2]} />
+        <meshStandardMaterial color={hair} roughness={0.95} />
+      </mesh>
+      <mesh position={[0, 1.35, 0]} castShadow>
+        <capsuleGeometry args={[0.31, 0.74, 6, 12]} />
         <meshStandardMaterial color={shirt} roughness={0.9} />
       </mesh>
-      {[-0.15, 0.15].map((x) => (
-        <mesh key={x} position={[x, 0.38, 0]} castShadow>
-          <capsuleGeometry args={[0.08, 0.55, 4, 8]} />
-          <meshStandardMaterial color="#596f72" roughness={0.95} />
+      <group ref={leftArm} position={[-0.38, 1.55, 0]}>
+        <mesh position={[0, -0.34, 0]} castShadow>
+          <capsuleGeometry args={[0.075, 0.58, 5, 9]} />
+          <meshStandardMaterial color={skin} roughness={0.92} />
         </mesh>
-      ))}
+      </group>
+      <group ref={rightArm} position={[0.38, 1.55, 0]}>
+        <mesh position={[0, -0.34, 0]} castShadow>
+          <capsuleGeometry args={[0.075, 0.58, 5, 9]} />
+          <meshStandardMaterial color={skin} roughness={0.92} />
+        </mesh>
+      </group>
+      <group ref={leftLeg} position={[-0.16, 0.78, 0]}>
+        <mesh position={[0, -0.34, 0]} castShadow>
+          <capsuleGeometry args={[0.09, 0.58, 5, 9]} />
+          <meshStandardMaterial color={trousers} roughness={0.95} />
+        </mesh>
+        <mesh position={[0, -0.72, 0.08]} castShadow>
+          <boxGeometry args={[0.18, 0.1, 0.34]} />
+          <meshStandardMaterial color={shoes} roughness={0.95} />
+        </mesh>
+      </group>
+      <group ref={rightLeg} position={[0.16, 0.78, 0]}>
+        <mesh position={[0, -0.34, 0]} castShadow>
+          <capsuleGeometry args={[0.09, 0.58, 5, 9]} />
+          <meshStandardMaterial color={trousers} roughness={0.95} />
+        </mesh>
+        <mesh position={[0, -0.72, 0.08]} castShadow>
+          <boxGeometry args={[0.18, 0.1, 0.34]} />
+          <meshStandardMaterial color={shoes} roughness={0.95} />
+        </mesh>
+      </group>
     </group>
   );
 }
-
 function TownEnvironment({ reduced }: { reduced: boolean }) {
   return (
     <>
@@ -724,7 +780,7 @@ function Framing() {
   return (
     <OrthographicCamera
       makeDefault
-      position={[0, 20, size.height < 300 ? 29 : 27]}
+      position={[0, 21, size.height < 300 ? 24.5 : 24]}
       rotation={[-Math.PI / 4, 0, 0]}
       zoom={townZoom(size.width, size.height)}
       near={0.1}
@@ -749,7 +805,7 @@ export default function TownScene({
       shadows
       frameloop={reduced ? "demand" : "always"}
       dpr={[1, 1.5]}
-      camera={{ position: [0, 20, 27], zoom: 25, near: 0.1, far: 150 }}
+      camera={{ position: [0, 21, 24], zoom: 25, near: 0.1, far: 150 }}
       gl={{ antialias: true, alpha: false }}
       fallback={
         <p className={styles.noWebgl}>
