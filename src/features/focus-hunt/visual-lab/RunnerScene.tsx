@@ -133,26 +133,7 @@ export const RunnerScene = memo(function RunnerScene({
       model.object.traverse((object) => {
         if (object instanceof THREE.Mesh)
           object.onAfterRender = () => {
-            const trafficCount = lowQuality
-      ? Math.min(trafficShips.length, audience === "teen" ? 4 : 2)
-      : trafficShips.length;
-    trafficRefs.current.forEach((traffic, i) => {
-      if (!traffic) return;
-      traffic.visible = i < trafficCount && runtime.running;
-      if (!traffic.visible) return;
-      const cycle = (state.elapsed * (audience === "teen" ? 34 : 26) + i * 83) % 180;
-      const relative = 70 - cycle;
-      const trafficDistance = THREE.MathUtils.clamp(
-        state.distance + relative,
-        8,
-        COURSE.length - 8,
-      );
-      const side = i % 2 === 0 ? -1 : 1;
-      const tp = trackPoint(trafficDistance, side * (9.5 + (i % 3) * 1.8));
-      traffic.position.set(tp.x, COURSE.deck - 3.9, tp.z);
-      traffic.rotation.set(0, -tp.yaw + Math.PI, 0);
-    });
-    const item = runtime.pickup;
+            const item = runtime.pickup;
             if (runtime.running && item?.model === index)
               runtime.session.presented(item.id, performance.now());
           };
@@ -254,6 +235,30 @@ export const RunnerScene = memo(function RunnerScene({
       );
       camera.updateProjectionMatrix();
     }
+    const trafficCount = lowQuality
+      ? Math.min(trafficShips.length, audience === "teen" ? 4 : 2)
+      : trafficShips.length;
+    trafficRefs.current.forEach((traffic, i) => {
+      if (!traffic) return;
+      traffic.visible = i < trafficCount && runtime.running;
+      if (!traffic.visible) return;
+      const cycle =
+        (state.elapsed * (audience === "teen" ? 34 : 26) + i * 83) % 180;
+      const relative = 70 - cycle;
+      const trafficDistance = THREE.MathUtils.clamp(
+        state.distance + relative,
+        8,
+        COURSE.length - 8,
+      );
+      const side = i % 2 === 0 ? -1 : 1;
+      const tp = trackPoint(
+        trafficDistance,
+        side * (9.5 + (i % 3) * 1.8),
+      );
+      traffic.position.set(tp.x, COURSE.deck - 3.9, tp.z);
+      traffic.rotation.set(0, -tp.yaw + Math.PI, 0);
+    });
+
     const item = runtime.pickup;
     if (pickup.current) {
       pickup.current.visible = !!item;
