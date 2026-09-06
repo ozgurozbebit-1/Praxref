@@ -755,7 +755,7 @@ function TownSymbol({
     age.current += delta;
     if (face.current)
       face.current.scale.setScalar(
-        0.58 *
+        0.725 *
           (chosen && !reduced
             ? 1 + Math.sin(Math.min(1, age.current / 0.22) * Math.PI) * 0.055
             : 1),
@@ -912,7 +912,7 @@ function Framing() {
       makeDefault
       position={[0, 24, size.height < 300 ? 24.49 : 24]}
       rotation={[-Math.PI / 4, 0, 0]}
-      zoom={townZoom(size.width, size.height)}
+      zoom={townZoom(size.width, size.height) * 2}
       near={0.1}
       far={150}
     />
