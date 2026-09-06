@@ -2,7 +2,7 @@ import { Game } from "@/components/game";
 import { Shell } from "@/components/shell";
 import { MissionShell } from "@/features/adventure/components/mission-shell";
 import { RunnerGame } from "@/features/focus-hunt/visual-lab/RunnerGame";
-import { InhibitionGame } from "@/features/inhibition/components/inhibition-game";
+import { StarBlaster } from "@/features/inhibition/visual-lab/StarBlaster";
 import { SelectiveAttentionGame } from "@/features/selective-attention/components/selective-attention-game";
 import { TownLab } from "@/features/selective-attention/visual-lab/TownLab";
 import { WorkingMemoryGame } from "@/features/working-memory/components/working-memory-game";
@@ -28,6 +28,12 @@ export default async function AudienceGame({
         <PraxrefCity audience={safeAudience} development={false} />
       </Shell>
     );
+  if (game === "inhibition")
+    return (
+      <Shell play>
+        <StarBlaster audience={safeAudience} development={false} />
+      </Shell>
+    );
   // Selective Attention now opens directly into the approved Sahil Kasabası experience.
   if (game === "selective-attention")
     return (
@@ -39,8 +45,6 @@ export default async function AudienceGame({
   const content =
     game === "selective-attention" ? (
       <SelectiveAttentionGame audience={safeAudience} />
-    ) : game === "inhibition" ? (
-      <InhibitionGame audience={safeAudience} />
     ) : game === "working-memory" ? (
       <WorkingMemoryGame audience={safeAudience} />
     ) : (
