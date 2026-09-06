@@ -210,6 +210,10 @@ function RunnerSession({
         <p>Atlas bitiş kapısına ulaştın. {hud.stars} altın yıldız topladın.</p>
         <div className={styles.metrics}>
           <div>
+            <strong>{hud.stars}</strong>
+            <span>Skor</span>
+          </div>
+          <div>
             <strong>
               {summary.accuracyPercent === null
                 ? "—"
@@ -233,7 +237,7 @@ function RunnerSession({
           </div>
         </div>
         <p>
-          54 saniye · {hud.jumps} atlayış · {summary.totalTrials} deneme
+          90 saniye · {hud.jumps} atlayış · {summary.totalTrials} deneme
         </p>
         <p className={styles.note}>
           Bu parkur skoru klinik değerlendirme değildir ve klinisyen geçmişine
@@ -297,7 +301,7 @@ function RunnerSession({
         role="progressbar"
         aria-label="Parkur ilerlemesi"
         aria-valuemin={0}
-        aria-valuemax={54}
+        aria-valuemax={90}
         aria-valuenow={Math.floor(hud.elapsed)}
       >
         <span style={{ width: `${(hud.elapsed / COURSE.seconds) * 100}%` }} />
