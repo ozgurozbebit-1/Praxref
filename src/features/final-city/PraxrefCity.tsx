@@ -567,7 +567,7 @@ export function PraxrefCity({
   const [combo, setCombo] = useState(0);
   const [hits, setHits] = useState(0);
   const [wrong, setWrong] = useState(0);
-  const [remaining, setRemaining] = useState(audience === "teen" ? 65 : 75);
+  const [remaining, setRemaining] = useState(90);
   const [missionIndex, setMissionIndex] = useState(0);
   const inputRef = useRef<InputState>({
     x: 0,
@@ -581,7 +581,7 @@ export function PraxrefCity({
   useEffect(() => {
     if (phase !== "running") return;
     const started = performance.now();
-    const duration = (audience === "teen" ? 65 : 75) * 1000;
+    const duration = 90000;
     const id = window.setInterval(() => {
       const left = Math.max(0, duration - (performance.now() - started));
       setRemaining(left / 1000);
