@@ -324,6 +324,50 @@ function Sea({ reduced }: { reduced: boolean }) {
     </group>
   );
 }
+
+function TownWalker({
+  path,
+  phase,
+  shirt,
+  reduced,
+}: {
+  path: [V3, V3];
+  phase: number;
+  shirt: string;
+  reduced: boolean;
+}) {
+  const group = useRef<Group>(null);
+  useFrame(({ clock }) => {
+    if (!group.current || reduced) return;
+    const t = (Math.sin(clock.elapsedTime * 0.32 + phase) + 1) / 2;
+    const [a, b] = path;
+    group.current.position.set(
+      a[0] + (b[0] - a[0]) * t,
+      a[1] + (b[1] - a[1]) * t,
+      a[2] + (b[2] - a[2]) * t,
+    );
+    group.current.rotation.y = Math.cos(clock.elapsedTime * 0.32 + phase) >= 0 ? 0 : Math.PI;
+  });
+  return (
+    <group ref={group} position={path[0]} scale={0.72}>
+      <mesh position={[0, 1.72, 0]} castShadow>
+        <sphereGeometry args={[0.26, 12, 10]} />
+        <meshStandardMaterial color="#d7a67e" roughness={0.9} />
+      </mesh>
+      <mesh position={[0, 1.08, 0]} castShadow>
+        <capsuleGeometry args={[0.27, 0.72, 5, 10]} />
+        <meshStandardMaterial color={shirt} roughness={0.9} />
+      </mesh>
+      {[-0.15, 0.15].map((x) => (
+        <mesh key={x} position={[x, 0.38, 0]} castShadow>
+          <capsuleGeometry args={[0.08, 0.55, 4, 8]} />
+          <meshStandardMaterial color="#596f72" roughness={0.95} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
 function TownEnvironment({ reduced }: { reduced: boolean }) {
   return (
     <>
@@ -375,6 +419,9 @@ function TownEnvironment({ reduced }: { reduced: boolean }) {
         <Tree key={i} position={p as V3} reduced={reduced} variant={i % 2} />
       ))}
       <Fountain reduced={reduced} />
+      <TownWalker path={[[ -8.8, 0, 2.5 ], [ -5.8, 0, 2.5 ]]} phase={0} shirt="#7d9f8c" reduced={reduced} />
+      <TownWalker path={[[ 4.6, 0, 3.0 ], [ 7.7, 0, 3.0 ]]} phase={2.2} shirt="#c69a74" reduced={reduced} />
+      <TownWalker path={[[ -1.2, 0, 7.0 ], [ 1.8, 0, 7.0 ]]} phase={4.1} shirt="#718c9b" reduced={reduced} />
       <Bench position={[-5.1, 0, 0.5]} />
       <Bench position={[5.1, 0, 0.5]} />
       <Bench position={[-5.1, 0, 5.8]} />
@@ -578,7 +625,7 @@ function TownSymbol({
         size={[0.16, 0.16, 1.0]}
         color="#617f78"
       />
-      <group position={[0, 0, 0.9]} rotation={[-Math.PI / 4, 0, 0]} ref={face}>
+      <group position={[0, 0, 0.9]} rotation={[-0.62, 0, 0]} ref={face}>
         <mesh position={[0, 0, -0.42]} castShadow receiveShadow>
           <extrudeGeometry
             args={[
@@ -677,7 +724,7 @@ function Framing() {
   return (
     <OrthographicCamera
       makeDefault
-      position={[0, 24, size.height < 300 ? 24.49 : 24]}
+      position={[0, 20, size.height < 300 ? 29 : 27]}
       rotation={[-Math.PI / 4, 0, 0]}
       zoom={townZoom(size.width, size.height)}
       near={0.1}
@@ -702,7 +749,7 @@ export default function TownScene({
       shadows
       frameloop={reduced ? "demand" : "always"}
       dpr={[1, 1.5]}
-      camera={{ position: [0, 24, 24], zoom: 25, near: 0.1, far: 150 }}
+      camera={{ position: [0, 20, 27], zoom: 25, near: 0.1, far: 150 }}
       gl={{ antialias: true, alpha: false }}
       fallback={
         <p className={styles.noWebgl}>
