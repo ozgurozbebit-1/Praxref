@@ -910,9 +910,9 @@ function Framing() {
   return (
     <OrthographicCamera
       makeDefault
-      position={[0, 30, size.height < 300 ? 8.4 : 8]}
-      rotation={[-1.31, 0, 0]}
-      zoom={townZoom(size.width, size.height) * 1.72}
+      position={[0, 30, size.height < 300 ? 12.2 : 12]}
+      rotation={[-1.34, 0, 0]}
+      zoom={townZoom(size.width, size.height) * 1.46}
       near={0.1}
       far={150}
     />
