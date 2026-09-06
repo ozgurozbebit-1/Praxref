@@ -410,10 +410,10 @@ function forkRibbonGeometry(
     if (deckHeight(s + 0.5) < 0) continue;
     const f0 = splitFactor(s, start, end);
     const f1 = splitFactor(s + 1, start, end);
-    const inner0 = side * (innerBase + f0 * 1.35);
-    const outer0 = side * (outerBase + f0 * 1.15);
-    const inner1 = side * (innerBase + f1 * 1.35);
-    const outer1 = side * (outerBase + f1 * 1.15);
+    const inner0 = side * (innerBase + f0 * 2.0);
+    const outer0 = side * (outerBase + f0 * 1.8);
+    const inner1 = side * (innerBase + f1 * 2.0);
+    const outer1 = side * (outerBase + f1 * 1.8);
     const a = trackPoint(s, side < 0 ? outer0 : inner0);
     const b = trackPoint(s, side < 0 ? inner0 : outer0);
     const c = trackPoint(s + 1, side < 0 ? outer1 : inner1);
@@ -435,8 +435,8 @@ function forkGapGeometry(start: number, end: number) {
     if (deckHeight(s + 0.5) < 0) continue;
     const f0 = splitFactor(s, start, end);
     const f1 = splitFactor(s + 1, start, end);
-    const half0 = 0.42 + f0 * 1.35;
-    const half1 = 0.42 + f1 * 1.35;
+    const half0 = 0.42 + f0 * 2.05;
+    const half1 = 0.42 + f1 * 2.05;
     const a = trackPoint(s, -half0);
     const b = trackPoint(s, half0);
     const c = trackPoint(s + 1, -half1);
@@ -453,8 +453,8 @@ function forkGapGeometry(start: number, end: number) {
 }
 
 function ForkSection() {
-  const start = 610;
-  const end = 700;
+  const start = 575;
+  const end = 735;
   const left = useMemo(() => forkRibbonGeometry(start, end, -1), []);
   const right = useMemo(() => forkRibbonGeometry(start, end, 1), []);
   const gap = useMemo(() => forkGapGeometry(start, end), []);
@@ -466,8 +466,8 @@ function ForkSection() {
     },
     [left, right, gap],
   );
-  const entry = trackPoint(start - 7);
-  const merge = trackPoint(end + 5);
+  const entry = trackPoint(start - 9);
+  const merge = trackPoint(end + 8);
   return (
     <group>
       <mesh geometry={left} receiveShadow>
