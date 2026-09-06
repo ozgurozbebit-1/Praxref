@@ -2,8 +2,7 @@
   position: fixed;
   inset: 0;
   height: 100svh;
-  display: grid;
-  grid-template-rows: 54px 44px minmax(0, 1fr) 22px;
+  display: block;
   background: #eaf2e9;
   color: #244c50;
   z-index: 90;
@@ -14,6 +13,12 @@
   box-sizing: border-box;
 }
 .lab .hud {
+  position: absolute;
+  z-index: 50;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 54px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -63,6 +68,12 @@
   font-weight: 400;
 }
 .task {
+  position: absolute;
+  z-index: 49;
+  top: 54px;
+  left: 0;
+  right: 0;
+  height: 44px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -83,12 +94,17 @@
   font-weight: 600;
 }
 .stage {
-  position: relative;
-  min-height: 0;
+  position: absolute;
+  inset: 0;
   overflow: hidden;
+  padding-top: 96px;
+  padding-bottom: 22px;
 }
 .stage canvas {
-  display: block;
+  position: absolute !important;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
 }
 .welcome {
   position: absolute;
@@ -179,6 +195,12 @@
   background: #f4fff2;
 }
 .footer {
+  position: absolute;
+  z-index: 50;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 22px;
   display: flex;
   align-items: center;
   justify-content: space-between;
