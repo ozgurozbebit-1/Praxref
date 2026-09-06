@@ -260,6 +260,8 @@ export function MemoryRun({
   const [wrongIndex, setWrongIndex] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [round, setRound] = useState(0);
+  const [remaining, setRemaining] = useState(90);
+  const sessionStartedAt = useRef<number | null>(null);
   const [courierProgress, setCourierProgress] = useState(0);
   const [courierFrom, setCourierFrom] = useState(0);
   const [courierTo, setCourierTo] = useState(0);
@@ -269,6 +271,10 @@ export function MemoryRun({
   const wrongTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const startRound = () => {
+    if (phase === "intro") {
+      sessionStartedAt.current = performance.now();
+      setRemaining(90);
+    }
     const base = audience === "teen" ? 4 : 3;
     const max = audience === "teen" ? 7 : 5;
     const length = Math.min(max, base + Math.floor(round / 2));
@@ -348,6 +354,25 @@ export function MemoryRun({
     },
     [],
   );
+  useEffect(() => {
+    if (phase === "intro" || phase === "done" || !sessionStartedAt.current) return;
+    const id = window.setInterval(() => {
+      const left = Math.max(
+        0,
+        90 - (performance.now() - sessionStartedAt.current!) / 1000,
+      );
+      setRemaining(left);
+      if (left <= 0) {
+        if (showTimer.current) clearTimeout(showTimer.current);
+        if (stepTimer.current) clearTimeout(stepTimer.current);
+        if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
+        if (wrongTimer.current) clearTimeout(wrongTimer.current);
+        setLitIndex(null);
+        setPhase("done");
+      }
+    }, 100);
+    return () => window.clearInterval(id);
+  }, [phase]);
 
   const onSelect = (index: number) => {
     if (phase !== "recall") return;
@@ -370,11 +395,6 @@ export function MemoryRun({
       feedbackTimer.current = setTimeout(() => {
         const nextRound = round + 1;
         setRound(nextRound);
-        if (nextRound >= (audience === "teen" ? 7 : 6)) {
-          setPhase("done");
-          return;
-        }
-
         const base = audience === "teen" ? 4 : 3;
         const max = audience === "teen" ? 7 : 5;
         const length = Math.min(max, base + Math.floor(nextRound / 2));
@@ -400,8 +420,9 @@ export function MemoryRun({
           <h1>Neon Rota{audience === "teen" ? " · Teen" : ""}</h1>
         </div>
         <div className={styles.stats}>
+          <b>{Math.ceil(remaining)} sn</b>
           <b>{score} puan</b>
-          <span>Tur {Math.min(round + 1, audience === "teen" ? 7 : 6)}</span>
+          <span>Tur {round + 1}</span>
           <Link href={development ? `/play/${audience}/working-memory` : `/play/${audience}`}>
             Çıkış ↗
           </Link>
@@ -464,9 +485,8 @@ export function MemoryRun({
             <div className={styles.card}>
               <span className={styles.eyebrow}>GÖREV TAMAMLANDI</span>
               <h2>{score} puan</h2>
-              <p>
-                Tamamladığın rota uzunluğu: {sequence.length} platform.
-              </p>
+              <p>90 saniyelik Neon Rota oturumu tamamlandı.</p>
+              <p>Tamamlanan tur: {round} · Son rota: {sequence.length} platform.</p>
               <button onClick={() => window.location.reload()}>Yeniden oyna</button>
             </div>
           </div>
