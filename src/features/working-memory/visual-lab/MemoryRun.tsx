@@ -263,7 +263,10 @@ export function MemoryRun({
   const [courierProgress, setCourierProgress] = useState(0);
   const [courierFrom, setCourierFrom] = useState(0);
   const [courierTo, setCourierTo] = useState(0);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const stepTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wrongTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const startRound = () => {
     const base = audience === "teen" ? 4 : 3;
@@ -287,7 +290,7 @@ export function MemoryRun({
     const travel = audience === "teen" ? 300 : 430;
 
     if (shown >= sequence.length) {
-      timer.current = setTimeout(() => {
+      showTimer.current = setTimeout(() => {
         setLitIndex(null);
         setPhase("recall");
       }, hold);
@@ -309,28 +312,42 @@ export function MemoryRun({
     };
     requestAnimationFrame(animate);
 
-    timer.current = setTimeout(() => {
+    showTimer.current = setTimeout(() => {
       setLitIndex(null);
-      timer.current = setTimeout(() => setShown((value) => value + 1), 90);
+      stepTimer.current = setTimeout(
+        () => setShown((value) => value + 1),
+        90,
+      );
     }, hold);
 
     return () => {
-      if (timer.current) clearTimeout(timer.current);
+      if (showTimer.current) clearTimeout(showTimer.current);
+      if (stepTimer.current) clearTimeout(stepTimer.current);
     };
   }, [phase, shown, sequence, audience]);
 
   useEffect(() => {
     if (phase === "show" && sequence.length && shown === sequence.length) {
       const delay = audience === "teen" ? 260 : 420;
-      timer.current = setTimeout(() => {
+      showTimer.current = setTimeout(() => {
         setLitIndex(null);
         setPhase("recall");
       }, delay);
     }
     return () => {
-      if (timer.current) clearTimeout(timer.current);
+      if (showTimer.current) clearTimeout(showTimer.current);
     };
   }, [phase, shown, sequence.length, audience]);
+
+  useEffect(
+    () => () => {
+      if (showTimer.current) clearTimeout(showTimer.current);
+      if (stepTimer.current) clearTimeout(stepTimer.current);
+      if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
+      if (wrongTimer.current) clearTimeout(wrongTimer.current);
+    },
+    [],
+  );
 
   const onSelect = (index: number) => {
     if (phase !== "recall") return;
@@ -338,7 +355,8 @@ export function MemoryRun({
     if (index !== expected) {
       setWrongIndex(index);
       setScore((value) => Math.max(0, value - 4));
-      timer.current = setTimeout(() => setWrongIndex(null), 450);
+      if (wrongTimer.current) clearTimeout(wrongTimer.current);
+      wrongTimer.current = setTimeout(() => setWrongIndex(null), 450);
       return;
     }
 
@@ -348,11 +366,28 @@ export function MemoryRun({
 
     if (next.length === sequence.length) {
       setPhase("feedback");
-      timer.current = setTimeout(() => {
+      if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
+      feedbackTimer.current = setTimeout(() => {
         const nextRound = round + 1;
         setRound(nextRound);
-        if (nextRound >= (audience === "teen" ? 7 : 6)) setPhase("done");
-        else startRound();
+        if (nextRound >= (audience === "teen" ? 7 : 6)) {
+          setPhase("done");
+          return;
+        }
+
+        const base = audience === "teen" ? 4 : 3;
+        const max = audience === "teen" ? 7 : 5;
+        const length = Math.min(max, base + Math.floor(nextRound / 2));
+        const seq = createSequence(length);
+        setSequence(seq);
+        setChosen([]);
+        setWrongIndex(null);
+        setShown(0);
+        setCourierFrom(seq[0]);
+        setCourierTo(seq[0]);
+        setCourierProgress(0);
+        setLitIndex(seq[0]);
+        setPhase("show");
       }, 850);
     }
   };
