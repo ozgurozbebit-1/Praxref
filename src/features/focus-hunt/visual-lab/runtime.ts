@@ -53,16 +53,18 @@ function resolved(runtime: LabRuntime, correct: boolean) {
   runtime.pickup = null;
   runtime.nextTrialAt =
     runtime.runner.elapsed +
-    getDifficultyParams(runtime.session.audience, runtime.session.difficulty)
+    (getDifficultyParams(runtime.session.audience, runtime.session.difficulty)
       .interTrialMs /
-      1000;
+      1000) *
+      (runtime.session.audience === "teen" ? 0.55 : 1);
 }
 
 /** One render-frame update. Fixed-step physics catches swept pickup crossings. */
 export function advanceLab(runtime: LabRuntime, delta: number, now: number) {
   if (!runtime.running || runtime.paused || runtime.runner.finished) return;
   // Browser backgrounding pauses explicitly. A long stall never teleports the ship.
-  runtime.accumulator += Math.min(delta, 0.1);
+  const pace = runtime.session.audience === "teen" ? 1.25 : 1;
+  runtime.accumulator += Math.min(delta, 0.1) * pace;
   runtime.fx.age += Math.min(delta, 0.1);
   while (
     runtime.accumulator + 1e-10 >= COURSE.step &&
