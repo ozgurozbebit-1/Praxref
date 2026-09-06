@@ -3,7 +3,7 @@
   inset: 0;
   height: 100svh;
   display: grid;
-  grid-template-rows: 62px 52px minmax(0, 1fr) 26px;
+  grid-template-rows: 54px 44px minmax(0, 1fr) 22px;
   background: #eaf2e9;
   color: #244c50;
   z-index: 90;
@@ -18,7 +18,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 8px 28px;
+  padding: 6px 24px;
   height: 100%;
   width: 100%;
   max-width: none;
@@ -32,8 +32,8 @@
   color: #6b8580;
 }
 .brand h1 {
-  font-size: 22px;
-  margin: 4px 0 0;
+  font-size: 20px;
+  margin: 2px 0 0;
   letter-spacing: -0.035em;
 }
 .controls {
@@ -78,7 +78,7 @@
   color: #7c927d;
 }
 .task strong {
-  font-size: 22px;
+  font-size: 20px;
   color: #284d51;
   font-weight: 600;
 }
