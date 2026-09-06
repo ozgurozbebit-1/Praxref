@@ -387,11 +387,13 @@ function TownWalker({
   phase,
   shirt,
   reduced,
+  speedMultiplier = 1,
 }: {
   path: [V3, V3];
   phase: number;
   shirt: string;
   reduced: boolean;
+  speedMultiplier?: number;
 }) {
   const group = useRef<Group>(null);
   const leftArm = useRef<Group>(null);
@@ -409,7 +411,7 @@ function TownWalker({
       return;
     }
 
-    const speed = 0.48; // ~50% faster than the previous 0.32 pace.
+    const speed = 0.48 * speedMultiplier;
     const cycle = clock.elapsedTime * speed + phase;
     const t = (Math.sin(cycle) + 1) / 2;
     const [a, b] = path;
@@ -481,19 +483,25 @@ function TownWalker({
     </group>
   );
 }
-function TownEnvironment({ reduced }: { reduced: boolean }) {
+function TownEnvironment({
+  reduced,
+  audience,
+}: {
+  reduced: boolean;
+  audience: "kids" | "teen";
+}) {
   return (
     <>
       <Sea reduced={reduced} />
       <Block
         position={[0, -0.4, -0.3]}
-        size={[29, 0.65, 27]}
+        size={audience === "teen" ? [34, 0.65, 30] : [29, 0.65, 27]}
         color="#d7cfac"
         radius={0.3}
       />
       <Block
         position={[0, -0.03, -0.5]}
-        size={[28.7, 0.18, 26.4]}
+        size={audience === "teen" ? [33.7, 0.18, 29.4] : [28.7, 0.18, 26.4]}
         color="#e5dbc0"
       />
       <Block
@@ -515,29 +523,90 @@ function TownEnvironment({ reduced }: { reduced: boolean }) {
           radius={0.3}
         />
       ))}
-      <Shop x={-9.0} z={-9.0} color="#f0c6a3" awning="#d98778" kind={0} />
-      <Shop x={-3.0} z={-9.4} color="#f4dca1" awning="#729fa5" kind={1} />
-      <Shop x={3.0} z={-9.1} color="#c0d9bb" awning="#af8bab" kind={2} />
-      <Shop x={9.1} z={-8.8} color="#abd1d2" awning="#d59e62" kind={3} />
-      {[
-        [-10, 0, -5],
-        [-10, 0, 0],
-        [-10, 0, 5],
-        [10, 0, -4],
-        [10, 0, 1],
-        [10, 0, 6],
-        [-5, 0, 4.5],
-        [5, 0, 5],
-      ].map((p, i) => (
+      {(audience === "teen"
+        ? [
+            [-11.4, -9.1, "#f0c6a3", "#d98778", 0],
+            [-6.9, -9.5, "#f4dca1", "#729fa5", 1],
+            [-2.3, -9.15, "#c0d9bb", "#af8bab", 2],
+            [2.3, -9.35, "#abd1d2", "#d59e62", 3],
+            [6.9, -9.05, "#f0d0b6", "#7fa49b", 1],
+            [11.4, -9.4, "#c8c6df", "#c78372", 2],
+          ]
+        : [
+            [-9.0, -9.0, "#f0c6a3", "#d98778", 0],
+            [-3.0, -9.4, "#f4dca1", "#729fa5", 1],
+            [3.0, -9.1, "#c0d9bb", "#af8bab", 2],
+            [9.1, -8.8, "#abd1d2", "#d59e62", 3],
+          ]
+      ).map(([x, z, color, awning, kind], i) => (
+        <Shop
+          key={i}
+          x={x as number}
+          z={z as number}
+          color={color as string}
+          awning={awning as string}
+          kind={kind as number}
+        />
+      ))}
+      {(audience === "teen"
+        ? [
+            [-12, 0, -3.8],
+            [-12, 0, 5.8],
+            [12, 0, -3.2],
+            [12, 0, 5.5],
+            [-4.8, 0, 5.1],
+            [5.0, 0, 5.4],
+          ]
+        : [
+            [-10, 0, -5],
+            [-10, 0, 0],
+            [-10, 0, 5],
+            [10, 0, -4],
+            [10, 0, 1],
+            [10, 0, 6],
+            [-5, 0, 4.5],
+            [5, 0, 5],
+          ]
+      ).map((p, i) => (
         <Tree key={i} position={p as V3} reduced={reduced} variant={i % 2} />
       ))}
       <Fountain reduced={reduced} />
       <TownClutter />
-      <TownWalker path={[[ -8.8, 0, 2.5 ], [ -5.8, 0, 2.5 ]]} phase={0} shirt="#7d9f8c" reduced={reduced} />
-      <TownWalker path={[[ 4.6, 0, 3.0 ], [ 7.7, 0, 3.0 ]]} phase={2.2} shirt="#c69a74" reduced={reduced} />
-      <TownWalker path={[[ -1.2, 0, 7.0 ], [ 1.8, 0, 7.0 ]]} phase={4.1} shirt="#718c9b" reduced={reduced} />
-      <TownWalker path={[[ -10.4, 0, 5.2 ], [ -7.2, 0, 5.2 ]]} phase={1.1} shirt="#9c8675" reduced={reduced} />
-      <TownWalker path={[[ 7.5, 0, 6.2 ], [ 10.6, 0, 6.2 ]]} phase={3.0} shirt="#7a9a88" reduced={reduced} />
+      {(audience === "teen"
+        ? [
+            [[-11.5, 0, -1.2], [-8.3, 0, -1.2], 0.0, "#7d9f8c"],
+            [[-7.4, 0, 1.8], [-4.2, 0, 1.8], 0.6, "#c69a74"],
+            [[-3.5, 0, -0.2], [-0.5, 0, -0.2], 1.2, "#718c9b"],
+            [[0.7, 0, 2.5], [3.9, 0, 2.5], 1.8, "#9c8675"],
+            [[5.2, 0, -0.6], [8.5, 0, -0.6], 2.4, "#7a9a88"],
+            [[8.6, 0, 3.4], [11.7, 0, 3.4], 3.0, "#b08678"],
+            [[-11.2, 0, 5.0], [-8.0, 0, 5.0], 3.6, "#6f8e96"],
+            [[-7.0, 0, 7.2], [-3.8, 0, 7.2], 4.2, "#a78373"],
+            [[-2.8, 0, 5.6], [0.4, 0, 5.6], 4.8, "#6f917e"],
+            [[1.4, 0, 8.0], [4.5, 0, 8.0], 5.4, "#8a7d9a"],
+            [[5.0, 0, 6.2], [8.1, 0, 6.2], 6.0, "#9a8568"],
+            [[8.4, 0, 8.4], [11.5, 0, 8.4], 6.6, "#728e86"],
+            [[-9.3, 0, 3.2], [-6.1, 0, 3.2], 7.2, "#8d7d72"],
+            [[-1.0, 0, 3.8], [2.2, 0, 3.8], 7.8, "#6f8698"],
+            [[3.2, 0, 0.9], [6.4, 0, 0.9], 8.4, "#a17373"],
+          ]
+        : [
+            [[-8.8, 0, 2.5], [-5.8, 0, 2.5], 0.0, "#7d9f8c"],
+            [[4.6, 0, 3.0], [7.7, 0, 3.0], 2.2, "#c69a74"],
+            [[-1.2, 0, 7.0], [1.8, 0, 7.0], 4.1, "#718c9b"],
+            [[-10.4, 0, 5.2], [-7.2, 0, 5.2], 1.1, "#9c8675"],
+            [[7.5, 0, 6.2], [10.6, 0, 6.2], 3.0, "#7a9a88"],
+          ]
+      ).map(([from, to, phase, shirt], i) => (
+        <TownWalker
+          key={i}
+          path={[from as V3, to as V3]}
+          phase={phase as number}
+          shirt={shirt as string}
+          reduced={reduced}
+          speedMultiplier={audience === "teen" ? 2 : 1}
+        />
+      ))}
       <Bench position={[-5.1, 0, 0.5]} />
       <Bench position={[5.1, 0, 0.5]} />
       <Bench position={[-5.1, 0, 5.8]} />
@@ -854,11 +923,13 @@ export default function TownScene({
   response,
   onSelect,
   reduced,
+  audience,
 }: {
   placed: PlacedStimulus[];
   response: DemoState["response"];
   onSelect: (id: string) => void;
   reduced: boolean;
+  audience: "kids" | "teen";
 }) {
   return (
     <Canvas
@@ -894,7 +965,7 @@ export default function TownScene({
         shadow-bias={-0.0001}
       />
       <Framing />
-      <TownEnvironment reduced={reduced} />
+      <TownEnvironment reduced={reduced} audience={audience} />
       {placed.map((item) => (
         <TownSymbol
           key={item.socket.id}
