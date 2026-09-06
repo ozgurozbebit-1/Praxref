@@ -63,7 +63,7 @@ function resolved(runtime: LabRuntime, correct: boolean) {
 export function advanceLab(runtime: LabRuntime, delta: number, now: number) {
   if (!runtime.running || runtime.paused || runtime.runner.finished) return;
   // Browser backgrounding pauses explicitly. A long stall never teleports the ship.
-  const pace = runtime.session.audience === "teen" ? 1.25 : 1;
+  const pace = 1;
   runtime.accumulator += Math.min(delta, 0.1) * pace;
   runtime.fx.age += Math.min(delta, 0.1);
   while (
