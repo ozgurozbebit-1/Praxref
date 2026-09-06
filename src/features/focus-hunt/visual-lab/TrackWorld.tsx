@@ -188,64 +188,65 @@ function TrackSegment({ index }: { index: number }) {
 function Gate({ at, finish = false }: { at: number; finish?: boolean }) {
   const p = trackPoint(at);
   const praxrefLogo = useTexture("/assets/brand/logo/praxref-primary.png");
-  return (
-    <group position={[p.x, COURSE.deck, p.z]} rotation={[0, -p.yaw, 0]}>
-      {[-5, 5].map((x) => (
-        <mesh key={x} position={[x, 3.2, 0]} castShadow>
-          <boxGeometry args={[0.8, 6.4, 1.2]} />
-          <meshStandardMaterial
-            color={finish ? "#f1ba60" : "#d4e9e4"}
-            roughness={0.45}
-          />
-        </mesh>
-      ))}
-      <mesh position={[0, 6.5, 0]} castShadow>
-        <boxGeometry args={[10.8, 0.8, 1.2]} />
-        <meshStandardMaterial color={finish ? "#f1ba60" : "#d4e9e4"} />
-      </mesh>
-      <mesh position={[0, 6.48, 0.66]}>
-        <boxGeometry args={[8.5, 0.12, 0.03]} />
-        <meshBasicMaterial color="#31dfcd" />
-      </mesh>
-      {finish && (
-        <>
-          <mesh position={[0, 6.52, 0.69]}>
-            <planeGeometry args={[5.4, 1.45]} />
-            <meshBasicMaterial
-              map={praxrefLogo}
-              transparent
-              toneMapped={false}
-            />
-          </mesh>
-          <mesh position={[0, 5.45, 0.68]}>
-            <planeGeometry args={[4.8, 0.46]} />
-            <meshBasicMaterial color="#102d41" />
-          </mesh>
-          <mesh position={[0, 5.45, 0.695]}>
-            <planeGeometry args={[3.9, 0.08]} />
-            <meshBasicMaterial color="#f7d36f" toneMapped={false} />
-          </mesh>
-        </>
-      )}
-      {finish &&
-        [-1, 1].map((side) => (
-          <group key={side} position={[side * 5.6, 5.5, 0]}>
-            <mesh position={[0, 1, 0]}>
-              <cylinderGeometry args={[0.07, 0.07, 3, 6]} />
-              <meshStandardMaterial color="#f9deb0" />
-            </mesh>
-            <mesh position={[side * 0.8, 1.8, 0]}>
-              <planeGeometry args={[1.6, 0.85]} />
+
+  if (finish) {
+    return (
+      <group position={[p.x, COURSE.deck, p.z]} rotation={[0, -p.yaw, 0]}>
+        {[-5.25, 5.25].map((x) => (
+          <group key={x} position={[x, 3.25, 0]}>
+            <mesh castShadow>
+              <boxGeometry args={[0.9, 6.5, 1.05]} />
               <meshStandardMaterial
-                color="#eeb956"
-                side={THREE.DoubleSide}
-                roughness={0.8}
+                color="#102f43"
+                metalness={0.32}
+                roughness={0.36}
               />
+            </mesh>
+            <mesh position={[0, 0, 0.56]}>
+              <boxGeometry args={[0.16, 5.7, 0.035]} />
+              <meshBasicMaterial color="#e6bb59" toneMapped={false} />
             </mesh>
           </group>
         ))}
-      {finish &&
-        Array.from({ length: 16 }, (_, i) => (
+
+        <mesh position={[0, 6.55, 0]} castShadow>
+          <boxGeometry args={[11.4, 2.15, 1.05]} />
+          <meshStandardMaterial
+            color="#102f43"
+            metalness={0.34}
+            roughness={0.32}
+          />
+        </mesh>
+
+        <mesh position={[0, 6.62, 0.545]}>
+          <planeGeometry args={[4.7, 1.05]} />
+          <meshBasicMaterial
+            map={praxrefLogo}
+            transparent
+            toneMapped={false}
+          />
+        </mesh>
+
+        {Array.from({ length: 14 }, (_, i) => {
+          const x = -5.15 + i * 0.79;
+          const light = i % 2 === 0;
+          return (
+            <mesh key={i} position={[x, 5.62, 0.555]}>
+              <planeGeometry args={[0.79, 0.28]} />
+              <meshBasicMaterial
+                color={light ? "#f5f0dc" : "#173346"}
+                toneMapped={false}
+              />
+            </mesh>
+          );
+        })}
+
+        <mesh position={[0, 7.52, 0.555]}>
+          <planeGeometry args={[10.25, 0.08]} />
+          <meshBasicMaterial color="#54e2d3" toneMapped={false} />
+        </mesh>
+
+        {Array.from({ length: 16 }, (_, i) => (
           <mesh
             key={i}
             position={[-3.9 + (i % 8) * 1.1, 0.04, Math.floor(i / 8) * 0.6]}
@@ -253,10 +254,30 @@ function Gate({ at, finish = false }: { at: number; finish?: boolean }) {
           >
             <planeGeometry args={[1.1, 0.6]} />
             <meshBasicMaterial
-              color={(i + Math.floor(i / 8)) % 2 ? "#172e42" : "#f6f1d7"}
+              color={(i + Math.floor(i / 8)) % 2 ? "#173346" : "#f5f0dc"}
             />
           </mesh>
         ))}
+      </group>
+    );
+  }
+
+  return (
+    <group position={[p.x, COURSE.deck, p.z]} rotation={[0, -p.yaw, 0]}>
+      {[-5, 5].map((x) => (
+        <mesh key={x} position={[x, 3.2, 0]} castShadow>
+          <boxGeometry args={[0.8, 6.4, 1.2]} />
+          <meshStandardMaterial color="#d4e9e4" roughness={0.45} />
+        </mesh>
+      ))}
+      <mesh position={[0, 6.5, 0]} castShadow>
+        <boxGeometry args={[10.8, 0.8, 1.2]} />
+        <meshStandardMaterial color="#d4e9e4" />
+      </mesh>
+      <mesh position={[0, 6.48, 0.66]}>
+        <boxGeometry args={[8.5, 0.12, 0.03]} />
+        <meshBasicMaterial color="#31dfcd" />
+      </mesh>
     </group>
   );
 }
