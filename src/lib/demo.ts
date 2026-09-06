@@ -11,4 +11,5 @@ export const games = [
   ["selective-attention", "Gürültüde Hedef", "Seçici dikkat", "Kalabalığın içinden doğru işareti seç.", "signal"],
   ["inhibition", "Dur–Git", "İnhibisyon", "Doğru anda dur, doğru anda ilerle.", "path"],
   ["working-memory", "Akılda Tut", "Çalışma belleği", "İpuçlarını aklında tut ve eşleştir.", "memory"],
+  ["praxref-city", "PraxRef City", "Final görev", "Trafiği yönet, hedef rotasını seç ve şehri tamamla.", "city"],
 ] as const;
