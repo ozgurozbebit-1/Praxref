@@ -302,7 +302,7 @@ function Scene({
       s.lastSpawn = now;
     }
 
-    const duration = audience === "teen" ? 55 : 60;
+    const duration = 90;
     const elapsed = now - s.startedAt;
     const remaining = Math.max(0, duration - elapsed);
     if (remaining <= 0) {
@@ -532,7 +532,7 @@ export function StarBlaster({
     wrong: 0,
     missed: 0,
     combo: 0,
-    remaining: audience === "teen" ? 55 : 60,
+    remaining: 90,
   });
   const inputRef = useRef({
     x: 0,
