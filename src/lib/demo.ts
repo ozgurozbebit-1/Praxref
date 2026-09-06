@@ -9,7 +9,7 @@ export const monthlyTrend = [0, 0, 0, 0, 0, 0, 0];
 export const games = [
   ["focus-hunt", "Odak Avı", "Sürdürülen dikkat", "Bir keşif turunda hedefleri bul.", "orbit"],
   ["selective-attention", "Gürültüde Hedef", "Seçici dikkat", "Kalabalığın içinden doğru işareti seç.", "signal"],
-  ["inhibition", "Dur–Git", "İnhibisyon", "Doğru anda dur, doğru anda ilerle.", "path"],
+  ["inhibition", "Yıldız Savunması", "İnhibisyon", "Sarı yıldızları vur, diğer sembolleri bırak.", "path"],
   ["working-memory", "Akılda Tut", "Çalışma belleği", "İpuçlarını aklında tut ve eşleştir.", "memory"],
   ["praxref-city", "PraxRef City", "Final görev", "Trafiği yönet, hedef rotasını seç ve şehri tamamla.", "city"],
 ] as const;
