@@ -185,41 +185,64 @@ function TrackSegment({ index }: { index: number }) {
   );
 }
 
+function createWordmarkTexture() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 1024;
+  canvas.height = 256;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return new THREE.CanvasTexture(canvas);
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#f6f2df";
+  ctx.font = "900 132px Arial, Helvetica, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("PRAXREF", canvas.width / 2, canvas.height / 2 + 4);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.needsUpdate = true;
+  return texture;
+}
+
 function Gate({ at, finish = false }: { at: number; finish?: boolean }) {
   const p = trackPoint(at);
   const praxrefLogo = useTexture("/assets/brand/logo/praxref-primary.png");
+  const praxrefWordmark = useMemo(() => createWordmarkTexture(), []);
+  useEffect(() => () => praxrefWordmark.dispose(), [praxrefWordmark]);
 
   if (finish) {
     return (
       <group position={[p.x, COURSE.deck, p.z]} rotation={[0, -p.yaw, 0]}>
-        {[-5.25, 5.25].map((x) => (
-          <group key={x} position={[x, 3.25, 0]}>
+        {[-5.35, 5.35].map((x) => (
+          <group key={x} position={[x, 3.35, 0]}>
             <mesh castShadow>
-              <boxGeometry args={[0.9, 6.5, 1.05]} />
+              <boxGeometry args={[0.78, 6.7, 0.92]} />
               <meshStandardMaterial
-                color="#102f43"
-                metalness={0.32}
-                roughness={0.36}
+                color="#123247"
+                metalness={0.3}
+                roughness={0.34}
               />
             </mesh>
-            <mesh position={[0, 0, 0.56]}>
-              <boxGeometry args={[0.16, 5.7, 0.035]} />
-              <meshBasicMaterial color="#e6bb59" toneMapped={false} />
+            <mesh position={[0, 0, 0.49]}>
+              <boxGeometry args={[0.12, 5.9, 0.025]} />
+              <meshBasicMaterial color="#54e2d3" toneMapped={false} />
             </mesh>
           </group>
         ))}
 
-        <mesh position={[0, 6.55, 0]} castShadow>
-          <boxGeometry args={[11.4, 2.15, 1.05]} />
+        <mesh position={[0, 6.62, 0]} castShadow>
+          <boxGeometry args={[11.5, 2.5, 0.92]} />
           <meshStandardMaterial
-            color="#102f43"
-            metalness={0.34}
+            color="#123247"
+            metalness={0.32}
             roughness={0.32}
           />
         </mesh>
 
-        <mesh position={[0, 6.62, 0.545]}>
-          <planeGeometry args={[4.7, 1.05]} />
+        {/* Square brand mark stays square: no stretching. */}
+        <mesh position={[-4.25, 6.66, 0.475]}>
+          <planeGeometry args={[1.55, 1.55]} />
           <meshBasicMaterial
             map={praxrefLogo}
             transparent
@@ -227,24 +250,33 @@ function Gate({ at, finish = false }: { at: number; finish?: boolean }) {
           />
         </mesh>
 
-        {Array.from({ length: 14 }, (_, i) => {
-          const x = -5.15 + i * 0.79;
-          const light = i % 2 === 0;
-          return (
-            <mesh key={i} position={[x, 5.62, 0.555]}>
-              <planeGeometry args={[0.79, 0.28]} />
-              <meshBasicMaterial
-                color={light ? "#f5f0dc" : "#173346"}
-                toneMapped={false}
-              />
-            </mesh>
-          );
-        })}
-
-        <mesh position={[0, 7.52, 0.555]}>
-          <planeGeometry args={[10.25, 0.08]} />
-          <meshBasicMaterial color="#54e2d3" toneMapped={false} />
+        {/* Large, crisp wordmark rendered independently of the square logo asset. */}
+        <mesh position={[1.05, 6.7, 0.478]}>
+          <planeGeometry args={[6.5, 1.6]} />
+          <meshBasicMaterial
+            map={praxrefWordmark}
+            transparent
+            toneMapped={false}
+          />
         </mesh>
+
+        <mesh position={[1.05, 5.72, 0.479]}>
+          <planeGeometry args={[5.4, 0.12]} />
+          <meshBasicMaterial color="#e6bb59" toneMapped={false} />
+        </mesh>
+
+        {Array.from({ length: 14 }, (_, i) => (
+          <mesh
+            key={i}
+            position={[-5.15 + i * 0.79, 5.38, 0.48]}
+          >
+            <planeGeometry args={[0.79, 0.3]} />
+            <meshBasicMaterial
+              color={i % 2 === 0 ? "#f6f2df" : "#173346"}
+              toneMapped={false}
+            />
+          </mesh>
+        ))}
 
         {Array.from({ length: 16 }, (_, i) => (
           <mesh
@@ -254,7 +286,7 @@ function Gate({ at, finish = false }: { at: number; finish?: boolean }) {
           >
             <planeGeometry args={[1.1, 0.6]} />
             <meshBasicMaterial
-              color={(i + Math.floor(i / 8)) % 2 ? "#173346" : "#f5f0dc"}
+              color={(i + Math.floor(i / 8)) % 2 ? "#173346" : "#f6f2df"}
             />
           </mesh>
         ))}
@@ -529,13 +561,29 @@ function ForkSection() {
           side={THREE.DoubleSide}
         />
       </mesh>
-      <mesh geometry={gap}>
+      {[start + 20, start + 55, start + 90, start + 125].flatMap((at) =>
+        ([-1, 1] as const).map((side) => {
+          const f = splitFactor(at, start, end);
+          const p = trackPoint(at, side * (0.55 + f * 2.0));
+          return (
+            <group
+              key={`fork-inner-rail-${at}-${side}`}
+              position={[p.x, p.y + 0.32, p.z]}
+              rotation={[0, -p.yaw, 0]}
+            >
+              <mesh>
+                <boxGeometry args={[0.16, 0.42, 5.8]} />
+                <meshStandardMaterial color="#e8d8ae" roughness={0.7} />
+              </mesh>
+            </group>
+          );
+        }),
+      )}
+      <mesh geometry={gap} receiveShadow>
         <meshStandardMaterial
-          color="#38aeb0"
-          emissive="#1d7f8c"
-          emissiveIntensity={0.08}
-          roughness={0.38}
-          metalness={0.08}
+          color="#c8b990"
+          roughness={0.88}
+          metalness={0.02}
           side={THREE.DoubleSide}
         />
       </mesh>
