@@ -393,7 +393,63 @@ function CoastalMarkers() {
   );
 }
 
-export function TrackWorld({ reduced = false }: { reduced?: boolean }) {
+function ForkSection() {
+  const parts = useMemo(
+    () => [
+      roadGeometry(610, 700, -4.2, -0.95, 0.055),
+      roadGeometry(610, 700, 0.95, 4.2, 0.055),
+      roadGeometry(610, 700, -0.95, 0.95, 0.07),
+      roadGeometry(610, 700, -1.12, -0.92, 0.09),
+      roadGeometry(610, 700, 0.92, 1.12, 0.09),
+    ],
+    [],
+  );
+  useEffect(() => () => parts.forEach((g) => g.dispose()), [parts]);
+  const sign = trackPoint(603);
+  return (
+    <group>
+      <mesh geometry={parts[0]}>
+        <meshStandardMaterial color="#1c4058" roughness={0.58} metalness={0.2} />
+      </mesh>
+      <mesh geometry={parts[1]}>
+        <meshStandardMaterial color="#1c4058" roughness={0.58} metalness={0.2} />
+      </mesh>
+      <mesh geometry={parts[2]}>
+        <meshStandardMaterial color="#2396a2" roughness={0.32} metalness={0.12} />
+      </mesh>
+      {[parts[3], parts[4]].map((geometry, i) => (
+        <mesh key={i} geometry={geometry}>
+          <meshBasicMaterial color="#f4cf8a" />
+        </mesh>
+      ))}
+      <group
+        position={[sign.x, sign.y + 2.0, sign.z]}
+        rotation={[0, -sign.yaw, 0]}
+      >
+        <mesh>
+          <boxGeometry args={[7.8, 1.1, 0.28]} />
+          <meshStandardMaterial color="#183b52" />
+        </mesh>
+        <mesh position={[-2.0, 0, 0.16]} rotation={[0, 0, Math.PI / 4]}>
+          <boxGeometry args={[0.65, 0.65, 0.08]} />
+          <meshBasicMaterial color="#f4cf8a" />
+        </mesh>
+        <mesh position={[2.0, 0, 0.16]} rotation={[0, 0, Math.PI / 4]}>
+          <boxGeometry args={[0.65, 0.65, 0.08]} />
+          <meshBasicMaterial color="#f4cf8a" />
+        </mesh>
+      </group>
+    </group>
+  );
+}
+
+export function TrackWorld({
+  reduced = false,
+  audience,
+}: {
+  reduced?: boolean;
+  audience: "kids" | "teen";
+}) {
   const landmark = trackPoint(920, 36);
   return (
     <>
@@ -408,8 +464,26 @@ export function TrackWorld({ reduced = false }: { reduced?: boolean }) {
       />
       <Sea reduced={reduced} />
       <Islands />
+      {audience === "teen" && (
+        <group>
+          {[130, 260, 390, 575, 735, 880].map((at, i) => {
+            const p = trackPoint(at, i % 2 ? 12 : -12);
+            return (
+              <mesh key={at} position={[p.x, 1.2, p.z]}>
+                <octahedronGeometry args={[0.55]} />
+                <meshStandardMaterial
+                  color={i % 2 ? "#a855f7" : "#2ea8ff"}
+                  emissive={i % 2 ? "#6d2ca8" : "#1768a0"}
+                  emissiveIntensity={0.22}
+                />
+              </mesh>
+            );
+          })}
+        </group>
+      )}
       <CoastalMarkers />
       <RampMarkings />
+      <ForkSection />
       {COURSE_SECTIONS.map((_, i) => (
         <TrackSegment key={i} index={i} />
       ))}
