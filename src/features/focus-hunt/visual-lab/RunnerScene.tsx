@@ -4,6 +4,7 @@ import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { memo, useEffect, useMemo, useRef, type RefObject } from "react";
 import * as THREE from "three";
+import type { FocusHuntAudience } from "../types";
 import { COURSE, trackPoint } from "./course";
 import { advanceLab, type LabRuntime } from "./runtime";
 import { TrackWorld } from "./TrackWorld";
@@ -79,6 +80,7 @@ export const RunnerScene = memo(function RunnerScene({
   onReady,
   onUpdate,
   onFinish,
+  audience,
 }: {
   runtimeRef: RefObject<LabRuntime>;
   reduced: boolean;
@@ -86,6 +88,7 @@ export const RunnerScene = memo(function RunnerScene({
   onReady: () => void;
   onUpdate: () => void;
   onFinish: () => void;
+  audience: FocusHuntAudience;
 }) {
   const assets = useGLTF(LAB_ASSETS);
   const ship = useRef<THREE.Group>(null),
@@ -93,7 +96,8 @@ export const RunnerScene = memo(function RunnerScene({
     pickup = useRef<THREE.Group>(null),
     burst = useRef<THREE.Group>(null),
     shadow = useRef<THREE.Mesh>(null),
-    sun = useRef<THREE.DirectionalLight>(null);
+    sun = useRef<THREE.DirectionalLight>(null),
+    trafficRefs = useRef<(THREE.Group | null)[]>([]);
   const notified = useRef(false);
   const objects = useMemo(
     () =>
@@ -105,6 +109,13 @@ export const RunnerScene = memo(function RunnerScene({
         ),
       ),
     [assets],
+  );
+  const trafficShips = useMemo(
+    () =>
+      Array.from({ length: audience === "teen" ? 8 : 4 }, () =>
+        cloneModel(assets[0].scene, audience === "teen" ? 2.0 : 1.8),
+      ),
+    [assets, audience],
   );
   const vectors = useMemo(
     () => ({
@@ -122,18 +133,41 @@ export const RunnerScene = memo(function RunnerScene({
       model.object.traverse((object) => {
         if (object instanceof THREE.Mesh)
           object.onAfterRender = () => {
-            const item = runtime.pickup;
+            const trafficCount = lowQuality
+      ? Math.min(trafficShips.length, audience === "teen" ? 4 : 2)
+      : trafficShips.length;
+    trafficRefs.current.forEach((traffic, i) => {
+      if (!traffic) return;
+      traffic.visible = i < trafficCount && runtime.running;
+      if (!traffic.visible) return;
+      const cycle = (state.elapsed * (audience === "teen" ? 34 : 26) + i * 83) % 180;
+      const relative = 70 - cycle;
+      const trafficDistance = THREE.MathUtils.clamp(
+        state.distance + relative,
+        8,
+        COURSE.length - 8,
+      );
+      const side = i % 2 === 0 ? -1 : 1;
+      const tp = trackPoint(trafficDistance, side * (9.5 + (i % 3) * 1.8));
+      traffic.position.set(tp.x, COURSE.deck - 3.9, tp.z);
+      traffic.rotation.set(0, -tp.yaw + Math.PI, 0);
+    });
+    const item = runtime.pickup;
             if (runtime.running && item?.model === index)
               runtime.session.presented(item.id, performance.now());
           };
       }),
     );
     onReady();
-    return () =>
+    return () => {
       objects.forEach((model) =>
         model.materials.forEach((material) => material.dispose()),
       );
-  }, [objects, onReady, runtimeRef]);
+      trafficShips.forEach((model) =>
+        model.materials.forEach((material) => material.dispose()),
+      );
+    };
+  }, [objects, onReady, runtimeRef, trafficShips]);
 
   useFrame(({ camera }, delta) => {
     const runtime = runtimeRef.current;
@@ -257,7 +291,7 @@ export const RunnerScene = memo(function RunnerScene({
 
   return (
     <>
-      <TrackWorld reduced={reduced} />
+      <TrackWorld reduced={reduced} audience={audience} />
       {!lowQuality && (
         <directionalLight
           ref={sun}
@@ -274,6 +308,19 @@ export const RunnerScene = memo(function RunnerScene({
           shadow-bias={-0.001}
         />
       )}
+      <group>
+        {trafficShips.map((model, i) => (
+          <group
+            key={i}
+            ref={(node) => {
+              trafficRefs.current[i] = node;
+            }}
+            visible={false}
+          >
+            <primitive object={model.object} dispose={null} />
+          </group>
+        ))}
+      </group>
       <group ref={ship}>
         <primitive object={objects[0].object} dispose={null} />
         <group ref={exhaust} position={[0, -0.1, 1.1]}>
