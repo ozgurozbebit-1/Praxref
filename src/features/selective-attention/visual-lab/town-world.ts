@@ -59,7 +59,7 @@ export const COAST_TOWN: WorldDefinition = {
     name: names[i] ?? `Kasaba levhası ${i + 1}`,
     position,
     host: i < 4 ? "shop" : i < 8 ? "mailbox" : i < 12 ? "planter" : "harbour",
-    hitSize: 44,
+    hitSize: 55,
   })),
 };
 export const TOWN_COLORS: Record<Color, string> = {
