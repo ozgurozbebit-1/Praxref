@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import { RoundedBox, useTexture } from "@react-three/drei";
+import { useTexture } from "@react-three/drei";
 import Link from "next/link";
 import {
   Suspense,
@@ -316,7 +316,8 @@ function PlayerCar({
           roughness={0.08}
         />
       </mesh>
-      <mesh position={[0,.72,2.02]} castShadow><boxGeometry args={[1.75,.16,.18]}/><meshStandardMaterial color="#b52d2b" metalness={.45}/></mesh>\n      {[-0.67, 0.67].map((x) => (
+      <mesh position={[0,.72,2.02]} castShadow><boxGeometry args={[1.75,.16,.18]}/><meshStandardMaterial color="#b52d2b" metalness={.45}/></mesh>
+      {[-0.67, 0.67].map((x) => (
         <mesh key={x} position={[x, 0.6, -1.89]}>
           <boxGeometry args={[0.38, 0.16, 0.08]} />
           <meshBasicMaterial color="#ff5368" toneMapped={false} />
@@ -526,17 +527,26 @@ function Scene({
   audience,
   running,
   inputRef,
-  onGate,\n  missionIndex,\n}: {\n  audience: Audience;
+  onGate,
+  missionIndex,
+}: {
+  audience: Audience;
   running: boolean;
   inputRef: RefObject<InputState>;
-  onGate: (kind: SymbolKind, correct: boolean) => void;\n  missionIndex: number;\n}) {
+  onGate: (kind: SymbolKind, correct: boolean) => void;
+  missionIndex: number;
+}) {
   const speedRef = useRef(22);
   useFrame(() => {
     speedRef.current = inputRef.current.speed;
   });
   return (
     <>
-      <color attach="background" args={["#82c8ee"]} />\n      <fog attach="fog" args={["#b9d9e6", 72, 230]} />\n      <hemisphereLight intensity={2.1} color="#eaf8ff" groundColor="#6f756e" />\n      <ambientLight intensity={1.35} color="#fff4df" />\n      <directionalLight position={[-12, 24, 14]} intensity={3.8} color="#fff3d2" castShadow shadow-mapSize={[1024,1024]} />
+      <color attach="background" args={["#82c8ee"]} />
+      <fog attach="fog" args={["#b9d9e6", 72, 230]} />
+      <hemisphereLight intensity={2.1} color="#eaf8ff" groundColor="#6f756e" />
+      <ambientLight intensity={1.35} color="#fff4df" />
+      <directionalLight position={[-12, 24, 14]} intensity={3.8} color="#fff3d2" castShadow shadow-mapSize={[1024,1024]} />
       <CityWorld />
       <Traffic running={running} audience={audience} speedRef={speedRef} />
       <Gates missionIndex={missionIndex} onHit={onGate} inputRef={inputRef} running={running} />
@@ -658,7 +668,9 @@ export function PraxrefCity({
               audience={audience}
               running={phase === "running"}
               inputRef={inputRef}
-              onGate={onGate}\n              missionIndex={missionIndex}\n            />
+              onGate={onGate}
+              missionIndex={missionIndex}
+            />
           </Suspense>
         </Canvas>
 
