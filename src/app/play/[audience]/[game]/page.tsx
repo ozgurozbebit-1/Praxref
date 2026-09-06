@@ -6,6 +6,7 @@ import { InhibitionGame } from "@/features/inhibition/components/inhibition-game
 import { SelectiveAttentionGame } from "@/features/selective-attention/components/selective-attention-game";
 import { TownLab } from "@/features/selective-attention/visual-lab/TownLab";
 import { WorkingMemoryGame } from "@/features/working-memory/components/working-memory-game";
+import { PraxrefCity } from "@/features/final-city/PraxrefCity";
 import type { Audience } from "@/lib/audience";
 import { games } from "@/lib/demo";
 
@@ -19,6 +20,12 @@ export default async function AudienceGame({
     return (
       <Shell play>
         <RunnerGame audience={safeAudience} />
+      </Shell>
+    );
+  if (game === "praxref-city")
+    return (
+      <Shell play>
+        <PraxrefCity audience={safeAudience} development={false} />
       </Shell>
     );
   // Selective Attention now opens directly into the approved Sahil Kasabası experience.
