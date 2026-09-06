@@ -57,7 +57,7 @@ function Tree({
       );
   });
   return (
-    <group position={position}>
+    <group position={position} scale={1.15}>
       <mesh position={[0, 0.9, 0]} castShadow>
         <cylinderGeometry args={[0.14, 0.23, 1.8, 8]} />
         <meshStandardMaterial color="#987951" />
@@ -103,7 +103,7 @@ function Shop({
   kind: number;
 }) {
   return (
-    <group position={[x, 0, z]}>
+    <group position={[x, 0, z]} scale={1.18}>
       <Block
         position={[0, 1.65, 0]}
         size={[3.9, 3.3, 3.1]}
@@ -256,7 +256,7 @@ function Fountain({ reduced }: { reduced: boolean }) {
       water.current.scale.y = 1 + ambientMotion(clock.elapsedTime, reduced) * 2;
   });
   return (
-    <group position={[0, 0, 0.8]}>
+    <group position={[0, 0, 0.8]} scale={1.15}>
       <mesh receiveShadow>
         <cylinderGeometry args={[1.45, 1.6, 0.28, 32]} />
         <meshStandardMaterial color="#e8dcc1" />
