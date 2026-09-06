@@ -325,6 +325,63 @@ function Sea({ reduced }: { reduced: boolean }) {
   );
 }
 
+function TownClutter() {
+  const props: { position: V3; kind: "crate" | "table" | "umbrella" | "barrel"; color: string }[] = [
+    { position: [-10.8, 0.35, -1.0], kind: "crate", color: "#a98461" },
+    { position: [-6.7, 0.28, 2.8], kind: "barrel", color: "#8f806b" },
+    { position: [-2.9, 0.32, 3.0], kind: "table", color: "#b78a63" },
+    { position: [1.6, 0.32, 2.6], kind: "table", color: "#b78a63" },
+    { position: [6.5, 0.35, 2.6], kind: "umbrella", color: "#d9a875" },
+    { position: [10.9, 0.35, 0.0], kind: "crate", color: "#9aa97b" },
+    { position: [-9.8, 0.35, 7.8], kind: "umbrella", color: "#7fa3a2" },
+    { position: [-4.4, 0.35, 8.6], kind: "crate", color: "#b58a70" },
+    { position: [1.4, 0.28, 8.4], kind: "barrel", color: "#8d7a64" },
+    { position: [6.6, 0.35, 8.1], kind: "crate", color: "#9f8e75" },
+    { position: [10.3, 0.35, 6.6], kind: "umbrella", color: "#b9928a" },
+  ];
+  return (
+    <>
+      {props.map((item, i) => (
+        <group key={i} position={item.position}>
+          {item.kind === "crate" && (
+            <Block position={[0, 0, 0]} size={[0.8, 0.7, 0.8]} color={item.color} />
+          )}
+          {item.kind === "barrel" && (
+            <mesh castShadow>
+              <cylinderGeometry args={[0.35, 0.42, 0.82, 12]} />
+              <meshStandardMaterial color={item.color} roughness={0.92} />
+            </mesh>
+          )}
+          {item.kind === "table" && (
+            <>
+              <mesh position={[0, 0.45, 0]} castShadow>
+                <cylinderGeometry args={[0.62, 0.62, 0.08, 16]} />
+                <meshStandardMaterial color={item.color} roughness={0.9} />
+              </mesh>
+              <mesh position={[0, 0.2, 0]} castShadow>
+                <cylinderGeometry args={[0.07, 0.1, 0.5, 8]} />
+                <meshStandardMaterial color="#6f7770" roughness={0.95} />
+              </mesh>
+            </>
+          )}
+          {item.kind === "umbrella" && (
+            <>
+              <mesh position={[0, 1.0, 0]} castShadow>
+                <cylinderGeometry args={[0.04, 0.05, 2.0, 8]} />
+                <meshStandardMaterial color="#6f7770" />
+              </mesh>
+              <mesh position={[0, 2.0, 0]} rotation={[0, Math.PI / 8, 0]} castShadow>
+                <coneGeometry args={[0.9, 0.35, 12]} />
+                <meshStandardMaterial color={item.color} roughness={0.9} />
+              </mesh>
+            </>
+          )}
+        </group>
+      ))}
+    </>
+  );
+}
+
 function TownWalker({
   path,
   phase,
@@ -430,38 +487,38 @@ function TownEnvironment({ reduced }: { reduced: boolean }) {
       <Sea reduced={reduced} />
       <Block
         position={[0, -0.4, -0.3]}
-        size={[23, 0.65, 23]}
+        size={[29, 0.65, 27]}
         color="#d7cfac"
         radius={0.3}
       />
       <Block
         position={[0, -0.03, -0.5]}
-        size={[22.7, 0.18, 22.4]}
+        size={[28.7, 0.18, 26.4]}
         color="#e5dbc0"
       />
       <Block
         position={[0, 0.075, 0.7]}
-        size={[4, 0.04, 19.5]}
+        size={[4.5, 0.04, 23]}
         color="#f2e7cd"
       />
       <Block
         position={[0, 0.085, 1.0]}
-        size={[21.7, 0.04, 3.2]}
+        size={[27.2, 0.04, 3.5]}
         color="#f2e7cd"
       />
-      {[-9.8, 9.8].map((x) => (
+      {[-12.2, 12.2].map((x) => (
         <Block
           key={x}
           position={[x, 0.12, 1.9]}
-          size={[2.4, 0.2, 15.5]}
+          size={[2.8, 0.2, 18.5]}
           color="#8ab790"
           radius={0.3}
         />
       ))}
-      <Shop x={-7.3} z={-7.9} color="#f0c6a3" awning="#d98778" kind={0} />
-      <Shop x={-2.5} z={-8.3} color="#f4dca1" awning="#729fa5" kind={1} />
-      <Shop x={2.5} z={-8.0} color="#c0d9bb" awning="#af8bab" kind={2} />
-      <Shop x={7.4} z={-7.7} color="#abd1d2" awning="#d59e62" kind={3} />
+      <Shop x={-9.0} z={-9.0} color="#f0c6a3" awning="#d98778" kind={0} />
+      <Shop x={-3.0} z={-9.4} color="#f4dca1" awning="#729fa5" kind={1} />
+      <Shop x={3.0} z={-9.1} color="#c0d9bb" awning="#af8bab" kind={2} />
+      <Shop x={9.1} z={-8.8} color="#abd1d2" awning="#d59e62" kind={3} />
       {[
         [-10, 0, -5],
         [-10, 0, 0],
@@ -475,9 +532,12 @@ function TownEnvironment({ reduced }: { reduced: boolean }) {
         <Tree key={i} position={p as V3} reduced={reduced} variant={i % 2} />
       ))}
       <Fountain reduced={reduced} />
+      <TownClutter />
       <TownWalker path={[[ -8.8, 0, 2.5 ], [ -5.8, 0, 2.5 ]]} phase={0} shirt="#7d9f8c" reduced={reduced} />
       <TownWalker path={[[ 4.6, 0, 3.0 ], [ 7.7, 0, 3.0 ]]} phase={2.2} shirt="#c69a74" reduced={reduced} />
       <TownWalker path={[[ -1.2, 0, 7.0 ], [ 1.8, 0, 7.0 ]]} phase={4.1} shirt="#718c9b" reduced={reduced} />
+      <TownWalker path={[[ -10.4, 0, 5.2 ], [ -7.2, 0, 5.2 ]]} phase={1.1} shirt="#9c8675" reduced={reduced} />
+      <TownWalker path={[[ 7.5, 0, 6.2 ], [ 10.6, 0, 6.2 ]]} phase={3.0} shirt="#7a9a88" reduced={reduced} />
       <Bench position={[-5.1, 0, 0.5]} />
       <Bench position={[5.1, 0, 0.5]} />
       <Bench position={[-5.1, 0, 5.8]} />
@@ -626,9 +686,10 @@ function TownSymbol({
     age.current += delta;
     if (face.current)
       face.current.scale.setScalar(
-        chosen && !reduced
-          ? 1 + Math.sin(Math.min(1, age.current / 0.22) * Math.PI) * 0.055
-          : 1,
+        0.58 *
+          (chosen && !reduced
+            ? 1 + Math.sin(Math.min(1, age.current / 0.22) * Math.PI) * 0.055
+            : 1),
       );
     if (material.current)
       material.current.emissiveIntensity = chosen
@@ -825,10 +886,10 @@ export default function TownScene({
         shadow-autoUpdate={false}
         shadow-needsUpdate
         shadow-mapSize={[1024, 1024]}
-        shadow-camera-left={-18}
-        shadow-camera-right={18}
-        shadow-camera-top={18}
-        shadow-camera-bottom={-18}
+        shadow-camera-left={-22}
+        shadow-camera-right={22}
+        shadow-camera-top={22}
+        shadow-camera-bottom={-22}
         shadow-normalBias={0.06}
         shadow-bias={-0.0001}
       />
