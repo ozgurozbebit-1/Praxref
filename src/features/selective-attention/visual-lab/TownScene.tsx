@@ -386,24 +386,24 @@ function TownWalker({
         <meshStandardMaterial color={hair} roughness={0.95} />
       </mesh>
       <mesh position={[0, 1.35, 0]} castShadow>
-        <capsuleGeometry args={[0.31, 0.74, 6, 12]} />
+        <cylinderGeometry args={[0.3, 0.34, 0.86, 12]} />
         <meshStandardMaterial color={shirt} roughness={0.9} />
       </mesh>
       <group ref={leftArm} position={[-0.38, 1.55, 0]}>
         <mesh position={[0, -0.34, 0]} castShadow>
-          <capsuleGeometry args={[0.075, 0.58, 5, 9]} />
+          <cylinderGeometry args={[0.075, 0.075, 0.7, 8]} />
           <meshStandardMaterial color={skin} roughness={0.92} />
         </mesh>
       </group>
       <group ref={rightArm} position={[0.38, 1.55, 0]}>
         <mesh position={[0, -0.34, 0]} castShadow>
-          <capsuleGeometry args={[0.075, 0.58, 5, 9]} />
+          <cylinderGeometry args={[0.075, 0.075, 0.7, 8]} />
           <meshStandardMaterial color={skin} roughness={0.92} />
         </mesh>
       </group>
       <group ref={leftLeg} position={[-0.16, 0.78, 0]}>
         <mesh position={[0, -0.34, 0]} castShadow>
-          <capsuleGeometry args={[0.09, 0.58, 5, 9]} />
+          <cylinderGeometry args={[0.09, 0.09, 0.72, 8]} />
           <meshStandardMaterial color={trousers} roughness={0.95} />
         </mesh>
         <mesh position={[0, -0.72, 0.08]} castShadow>
@@ -413,7 +413,7 @@ function TownWalker({
       </group>
       <group ref={rightLeg} position={[0.16, 0.78, 0]}>
         <mesh position={[0, -0.34, 0]} castShadow>
-          <capsuleGeometry args={[0.09, 0.58, 5, 9]} />
+          <cylinderGeometry args={[0.09, 0.09, 0.72, 8]} />
           <meshStandardMaterial color={trousers} roughness={0.95} />
         </mesh>
         <mesh position={[0, -0.72, 0.08]} castShadow>
@@ -780,7 +780,7 @@ function Framing() {
   return (
     <OrthographicCamera
       makeDefault
-      position={[0, 21, size.height < 300 ? 24.5 : 24]}
+      position={[0, 24, size.height < 300 ? 24.49 : 24]}
       rotation={[-Math.PI / 4, 0, 0]}
       zoom={townZoom(size.width, size.height)}
       near={0.1}
@@ -805,7 +805,7 @@ export default function TownScene({
       shadows
       frameloop={reduced ? "demand" : "always"}
       dpr={[1, 1.5]}
-      camera={{ position: [0, 21, 24], zoom: 25, near: 0.1, far: 150 }}
+      camera={{ position: [0, 24, 24], zoom: 25, near: 0.1, far: 150 }}
       gl={{ antialias: true, alpha: false }}
       fallback={
         <p className={styles.noWebgl}>
