@@ -22,9 +22,9 @@ export const COURSE_SECTIONS = [
 export const RAMPS = [
   // Launch velocities are tuned for the 90 s / 10.8 m·s⁻¹ course pace so
   // the ship clears each water gap and lands on the far deck without dipping.
-  { start: 218, crest: 244, land: 264, rise: 3, launch: 18.8 },
-  { start: 542, crest: 568, land: 590, rise: 4, launch: 20.5 },
-  { start: 758, crest: 782, land: 804, rise: 3.6, launch: 20.7 },
+  { start: 218, crest: 244, land: 264, rise: 3, launch: 22.2 },
+  { start: 542, crest: 568, land: 590, rise: 4, launch: 23.6 },
+  { start: 758, crest: 782, land: 804, rise: 3.6, launch: 24.0 },
 ] as const;
 
 const clamp = (value: number, low: number, high: number) =>
@@ -127,12 +127,13 @@ export function stepRunner(state: RunnerState, input: number, delta: number) {
     }
   }
   const floor = deckHeight(state.distance);
+  const safeAirFloor = floor < 0 ? COURSE.deck + 0.55 : floor;
   if (state.airborne) {
     state.verticalVelocity -= COURSE.gravity * dt;
     state.height += state.verticalVelocity * dt;
-    if (state.height <= floor && state.verticalVelocity < 0) {
+    if (state.height <= safeAirFloor && state.verticalVelocity < 0) {
       state.landing = Math.min(0.15, -state.verticalVelocity * 0.009);
-      state.height = floor;
+      state.height = safeAirFloor;
       state.verticalVelocity = 0;
       state.airborne = false;
     }
