@@ -393,6 +393,131 @@ function CoastalMarkers() {
   );
 }
 
+function splitFactor(s: number, start: number, end: number) {
+  const t = THREE.MathUtils.clamp((s - start) / (end - start), 0, 1);
+  return Math.sin(t * Math.PI);
+}
+
+function forkRibbonGeometry(
+  start: number,
+  end: number,
+  side: -1 | 1,
+  innerBase = 0.55,
+  outerBase = 4.2,
+) {
+  const vertices: number[] = [];
+  for (let s = start; s < end; s++) {
+    if (deckHeight(s + 0.5) < 0) continue;
+    const f0 = splitFactor(s, start, end);
+    const f1 = splitFactor(s + 1, start, end);
+    const inner0 = side * (innerBase + f0 * 1.35);
+    const outer0 = side * (outerBase + f0 * 1.15);
+    const inner1 = side * (innerBase + f1 * 1.35);
+    const outer1 = side * (outerBase + f1 * 1.15);
+    const a = trackPoint(s, side < 0 ? outer0 : inner0);
+    const b = trackPoint(s, side < 0 ? inner0 : outer0);
+    const c = trackPoint(s + 1, side < 0 ? outer1 : inner1);
+    const d = trackPoint(s + 1, side < 0 ? inner1 : outer1);
+    for (const p of [a, b, c, b, d, c]) vertices.push(p.x, p.y + 0.085, p.z);
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute(
+    "position",
+    new THREE.Float32BufferAttribute(vertices, 3),
+  );
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+function forkGapGeometry(start: number, end: number) {
+  const vertices: number[] = [];
+  for (let s = start; s < end; s++) {
+    if (deckHeight(s + 0.5) < 0) continue;
+    const f0 = splitFactor(s, start, end);
+    const f1 = splitFactor(s + 1, start, end);
+    const half0 = 0.42 + f0 * 1.35;
+    const half1 = 0.42 + f1 * 1.35;
+    const a = trackPoint(s, -half0);
+    const b = trackPoint(s, half0);
+    const c = trackPoint(s + 1, -half1);
+    const d = trackPoint(s + 1, half1);
+    for (const p of [a, b, c, b, d, c]) vertices.push(p.x, p.y + 0.12, p.z);
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute(
+    "position",
+    new THREE.Float32BufferAttribute(vertices, 3),
+  );
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+function ForkSection() {
+  const start = 610;
+  const end = 700;
+  const left = useMemo(() => forkRibbonGeometry(start, end, -1), []);
+  const right = useMemo(() => forkRibbonGeometry(start, end, 1), []);
+  const gap = useMemo(() => forkGapGeometry(start, end), []);
+  useEffect(
+    () => () => {
+      left.dispose();
+      right.dispose();
+      gap.dispose();
+    },
+    [left, right, gap],
+  );
+  const entry = trackPoint(start - 7);
+  const merge = trackPoint(end + 5);
+  return (
+    <group>
+      <mesh geometry={left} receiveShadow>
+        <meshStandardMaterial
+          color="#1c4058"
+          roughness={0.56}
+          metalness={0.2}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+      <mesh geometry={right} receiveShadow>
+        <meshStandardMaterial
+          color="#1c4058"
+          roughness={0.56}
+          metalness={0.2}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+      <mesh geometry={gap}>
+        <meshStandardMaterial
+          color="#38aeb0"
+          emissive="#1d7f8c"
+          emissiveIntensity={0.08}
+          roughness={0.38}
+          metalness={0.08}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+      {[entry, merge].map((p, index) => (
+        <group
+          key={index}
+          position={[p.x, p.y + 1.55, p.z]}
+          rotation={[0, -p.yaw, 0]}
+        >
+          <mesh castShadow>
+            <boxGeometry args={[7.8, 0.82, 0.28]} />
+            <meshStandardMaterial color="#16384d" roughness={0.5} />
+          </mesh>
+          {[-2.2, 2.2].map((x) => (
+            <mesh key={x} position={[x, 0, 0.16]} rotation={[0, 0, Math.PI / 4]}>
+              <boxGeometry args={[0.58, 0.58, 0.08]} />
+              <meshBasicMaterial color="#f4cf8a" />
+            </mesh>
+          ))}
+        </group>
+      ))}
+    </group>
+  );
+}
+
 export function TrackWorld({
   reduced = false,
   audience,
@@ -433,6 +558,7 @@ export function TrackWorld({
       )}
       <CoastalMarkers />
       <RampMarkings />
+      <ForkSection />
       {COURSE_SECTIONS.map((_, i) => (
         <TrackSegment key={i} index={i} />
       ))}
