@@ -257,7 +257,7 @@ function RunnerSession({
           <span className={styles.eyebrow}>
             {development ? "PRAXREF · VISUAL LAB" : "PRAXREF · FOCUS HUNT"}
           </span>
-          <h1>Atlas Adaları</h1>
+          <h1>Atlas Adaları{audience === "teen" ? " · Teen" : ""}</h1>
         </div>
         <Link
           href={
@@ -376,6 +376,7 @@ function RunnerSession({
                 onReady={onReady}
                 onUpdate={onUpdate}
                 onFinish={onFinish}
+                audience={audience}
               />
             </Suspense>
           </Canvas>
@@ -408,7 +409,11 @@ function RunnerSession({
               <h2>Adaların üzerinden uç.</h2>
               <p>
                 Altın yıldızlara yönel. Diğer renkli şekillerden uzak dur.
-                Rampalarda gemi kendiliğinden sıçrar.
+                Rampalarda gemi kendiliğinden sıçrar. Parkur bir noktada iki kola
+                ayrılır; sağ ya da sol rotayı seçebilirsin.
+                {audience === "teen"
+                  ? " Teen parkurunda akış daha hızlı ve işaretler daha sık gelir."
+                  : ""}
               </p>
               <p className={styles.note}>
                 ← → / A–D · Mouse ile sağ–sol · Dokun ve sürükle
