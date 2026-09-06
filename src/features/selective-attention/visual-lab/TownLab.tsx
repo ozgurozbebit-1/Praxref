@@ -78,7 +78,7 @@ export function TownLab({ audience }: { audience: "kids" | "teen" }) {
       }
     }, 100);
     return () => window.clearInterval(id);
-  }, [audience, state, teenTrialMs]);
+  }, [audience, state, teenTrialMs, finished]);
   function start() {
     audio.unlock();
     setFinished(false);
