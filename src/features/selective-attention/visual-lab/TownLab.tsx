@@ -26,10 +26,13 @@ export function TownLab({ audience }: { audience: "kids" | "teen" }) {
   const [state, setState] = useState<DemoState | null>(null),
     [muted, setMuted] = useState(false),
     [remainingMs, setRemainingMs] = useState(teenTrialMs),
+    [sessionRemainingMs, setSessionRemainingMs] = useState(90000),
+    [finished, setFinished] = useState(false),
     [audio] = useState(createTownAudio);
   const stateRef = useRef<DemoState | null>(null),
     next = useRef<ReturnType<typeof setTimeout> | null>(null),
-    deadline = useRef<number | null>(null);
+    deadline = useRef<number | null>(null),
+    sessionDeadline = useRef<number | null>(null);
   const reduced = useSyncExternalStore(subscribeMotion, readMotion, () => true);
   useEffect(
     () => () => {
@@ -39,7 +42,22 @@ export function TownLab({ audience }: { audience: "kids" | "teen" }) {
     [audio],
   );
   useEffect(() => {
-    if (audience !== "teen" || !state || state.response) return;
+    if (!state || finished || !sessionDeadline.current) return;
+    const id = window.setInterval(() => {
+      const left = Math.max(0, sessionDeadline.current! - performance.now());
+      setSessionRemainingMs(left);
+      if (left <= 0) {
+        sessionDeadline.current = null;
+        deadline.current = null;
+        if (next.current) clearTimeout(next.current);
+        setFinished(true);
+      }
+    }, 100);
+    return () => window.clearInterval(id);
+  }, [state, finished]);
+
+  useEffect(() => {
+    if (audience !== "teen" || !state || state.response || finished) return;
     const id = window.setInterval(() => {
       if (!deadline.current) return;
       const left = Math.max(0, deadline.current - performance.now());
@@ -63,6 +81,9 @@ export function TownLab({ audience }: { audience: "kids" | "teen" }) {
   }, [audience, state, teenTrialMs]);
   function start() {
     audio.unlock();
+    setFinished(false);
+    setSessionRemainingMs(90000);
+    sessionDeadline.current = performance.now() + 90000;
     const initial = { trial: makeDemoTrial(1), score: 0, response: null };
     stateRef.current = initial;
     setState(initial);
@@ -72,6 +93,7 @@ export function TownLab({ audience }: { audience: "kids" | "teen" }) {
     }
   }
   function select(id: string) {
+    if (finished) return;
     const current = stateRef.current;
     if (!current) return;
     deadline.current = null;
@@ -97,7 +119,7 @@ export function TownLab({ audience }: { audience: "kids" | "teen" }) {
   // Stable synthetic preview, not a production trial and never saved as one.
   const preview = makeDemoTrial(0, () => 0.42);
   const placed = mapTrialToWorld((state?.trial ?? preview).stimuli).map(
-    (item) => ({ ...item, active: !!state }),
+    (item) => ({ ...item, active: !!state && !finished }),
   );
   return (
     <main
@@ -114,10 +136,16 @@ export function TownLab({ audience }: { audience: "kids" | "teen" }) {
             {state?.score ?? 0}
             <small> bulundu</small>
           </span>
-          {audience === "teen" && state && (
-            <span className={styles.score} aria-label="Kalan süre">
-              {(remainingMs / 1000).toFixed(1)}
+          {state && !finished && (
+            <span className={styles.score} aria-label="Oturumda kalan süre">
+              {Math.ceil(sessionRemainingMs / 1000)}
               <small> sn</small>
+            </span>
+          )}
+          {audience === "teen" && state && !finished && (
+            <span className={styles.score} aria-label="Hedef için kalan süre">
+              {(remainingMs / 1000).toFixed(1)}
+              <small> hedef</small>
             </span>
           )}
           <button
@@ -132,7 +160,7 @@ export function TownLab({ audience }: { audience: "kids" | "teen" }) {
           >
             {muted ? "Ses kapalı" : "Ses açık"}
           </button>
-          <Link href={`/play/${audience}/selective-attention`}>Çıkış ↗</Link>
+          <Link href={`/play/${audience}`}>Çıkış ↗</Link>
         </div>
       </header>
       <div className={styles.task}>
@@ -169,7 +197,16 @@ export function TownLab({ audience }: { audience: "kids" | "teen" }) {
             </small>
           </div>
         )}
-        {state?.response && (
+        {finished && state && (
+          <div className={styles.welcome}>
+            <span>GÖREV TAMAMLANDI</span>
+            <h2>{state.score} puan</h2>
+            <p>90 saniyelik Sahil Kasabası oturumu tamamlandı.</p>
+            <button type="button" onClick={start}>Yeniden oyna</button>
+            <Link href={`/play/${audience}`}>Oyun merkezine dön</Link>
+          </div>
+        )}
+        {!finished && state?.response && (
           <div
             key={state.trial.id}
             className={styles.feedback}
