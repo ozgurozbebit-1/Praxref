@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useTexture } from "@react-three/drei";
+import { RoundedBox, useTexture } from "@react-three/drei";
 import Link from "next/link";
 import {
   Suspense,
@@ -55,6 +55,10 @@ function seeded(i: number) {
   return x - Math.floor(x);
 }
 
+function RoadsideTree({ x, z }: { x: number; z: number }) {
+  return <group position={[x,0,z]}><mesh position={[0,.7,0]} castShadow><cylinderGeometry args={[.14,.2,1.4,10]}/><meshStandardMaterial color="#75543d"/></mesh><mesh position={[0,2.05,0]} castShadow><sphereGeometry args={[.95,14,10]}/><meshStandardMaterial color="#3f8f67" roughness={.82}/></mesh><mesh position={[.42,2.2,.1]} castShadow><sphereGeometry args={[.62,12,8]}/><meshStandardMaterial color="#65aa76" roughness={.85}/></mesh></group>;
+}
+
 function Building({
   x,
   z,
@@ -82,9 +86,9 @@ function Building({
       <mesh castShadow receiveShadow>
         <boxGeometry args={[w, h, d]} />
         <meshStandardMaterial
-          color={side < 0 ? "#0a1727" : "#0b1a2c"}
-          metalness={0.55}
-          roughness={0.36}
+          color={index % 5 === 0 ? "#c96f54" : index % 5 === 1 ? "#6c93a5" : index % 5 === 2 ? "#d2a35f" : index % 5 === 3 ? "#628c83" : "#8b7d91"}
+          metalness={0.12}
+          roughness={0.58}
         />
       </mesh>
       {Array.from({ length: Math.floor(h / 1.15) }, (_, floor) =>
@@ -99,9 +103,9 @@ function Building({
           >
             <planeGeometry args={[w * 0.25, 0.12]} />
             <meshBasicMaterial
-              color={accent}
+              color={floor % 3 === 0 ? "#bfe9ff" : accent}
               transparent
-              opacity={0.16 + ((floor + col) % 3) * 0.13}
+              opacity={0.52 + ((floor + col) % 3) * 0.12}
               toneMapped={false}
             />
           </mesh>
@@ -183,7 +187,7 @@ function CityWorld() {
     <group>
       <mesh position={[0, -0.16, -104]} receiveShadow>
         <boxGeometry args={[15.6, 0.3, 228]} />
-        <meshStandardMaterial color="#162b3a" roughness={0.68} metalness={0.15} />
+        <meshStandardMaterial color="#30343a" roughness={0.9} metalness={0.02} />
       </mesh>
       {[-5.25, -1.75, 1.75, 5.25].map((x) => (
         <group key={x}>
@@ -197,11 +201,11 @@ function CityWorld() {
       ))}
       <mesh position={[-8.2, 0.05, -104]}>
         <boxGeometry args={[0.62, 0.14, 228]} />
-        <meshStandardMaterial color="#2bb3be" emissive="#187b89" emissiveIntensity={0.42} />
+        <meshStandardMaterial color="#d7d9d5" roughness={0.86} />
       </mesh>
       <mesh position={[8.2, 0.05, -104]}>
         <boxGeometry args={[0.62, 0.14, 228]} />
-        <meshStandardMaterial color="#2bb3be" emissive="#187b89" emissiveIntensity={0.42} />
+        <meshStandardMaterial color="#d7d9d5" roughness={0.86} />
       </mesh>
 
       {buildings.map((b, i) => (
@@ -212,6 +216,8 @@ function CityWorld() {
             <>
               <StreetLight x={-7.45} z={b.z + 1.5} />
               <StreetLight x={7.45} z={b.z + 1.5} />
+              <RoadsideTree x={-9.1} z={b.z - 1.3} />
+              <RoadsideTree x={9.1} z={b.z - 1.3} />
             </>
           )}
         </group>
@@ -287,9 +293,9 @@ function PlayerCar({
   return (
     <group ref={car} position={[0, 0, 3.1]}>
       <mesh position={[0, 0.58, 0]} castShadow>
-        <boxGeometry args={[2.05, 0.55, 3.7]} />
+        <boxGeometry args={[2.12, 0.48, 4.05]} />
         <meshStandardMaterial
-          color="#146b8d"
+          color="#d64c3e"
           emissive="#0d3045"
           emissiveIntensity={0.22}
           metalness={0.72}
@@ -297,20 +303,20 @@ function PlayerCar({
         />
       </mesh>
       <mesh position={[0, 1.02, -0.2]} castShadow>
-        <boxGeometry args={[1.58, 0.52, 1.75]} />
-        <meshStandardMaterial color="#112b3f" metalness={0.78} roughness={0.16} />
+        <boxGeometry args={[1.62, 0.48, 1.82]} />
+        <meshStandardMaterial color="#18222d" metalness={0.78} roughness={0.16} />
       </mesh>
-      <mesh position={[0, 1.12, 0.7]}>
-        <boxGeometry args={[1.48, 0.34, 0.08]} />
+      <mesh position={[0, .86, 1.62]} rotation={[-.32,0,0]}>
+        <boxGeometry args={[1.54, .72, .06]} />
         <meshStandardMaterial
-          color="#7fdcff"
+          color="#b9e6f4"
           emissive="#41b9e8"
           emissiveIntensity={0.62}
           metalness={0.2}
           roughness={0.08}
         />
       </mesh>
-      {[-0.67, 0.67].map((x) => (
+      <mesh position={[0,.72,2.02]} castShadow><boxGeometry args={[1.75,.16,.18]}/><meshStandardMaterial color="#b52d2b" metalness={.45}/></mesh>\n      {[-0.67, 0.67].map((x) => (
         <mesh key={x} position={[x, 0.6, -1.89]}>
           <boxGeometry args={[0.38, 0.16, 0.08]} />
           <meshBasicMaterial color="#ff5368" toneMapped={false} />
@@ -520,27 +526,20 @@ function Scene({
   audience,
   running,
   inputRef,
-  onGate,
-}: {
-  audience: Audience;
+  onGate,\n  missionIndex,\n}: {\n  audience: Audience;
   running: boolean;
   inputRef: RefObject<InputState>;
-  onGate: (kind: SymbolKind, correct: boolean) => void;
-}) {
+  onGate: (kind: SymbolKind, correct: boolean) => void;\n  missionIndex: number;\n}) {
   const speedRef = useRef(22);
   useFrame(() => {
     speedRef.current = inputRef.current.speed;
   });
   return (
     <>
-      <color attach="background" args={["#030814"]} />
-      <fog attach="fog" args={["#030814", 58, 220]} />
-      <ambientLight intensity={0.72} color="#91bfff" />
-      <directionalLight position={[8, 14, 8]} intensity={2.4} color="#d9efff" castShadow />
-      <pointLight position={[0, 7, 5]} intensity={8} color="#28bfe5" distance={22} />
+      <color attach="background" args={["#82c8ee"]} />\n      <fog attach="fog" args={["#b9d9e6", 72, 230]} />\n      <hemisphereLight intensity={2.1} color="#eaf8ff" groundColor="#6f756e" />\n      <ambientLight intensity={1.35} color="#fff4df" />\n      <directionalLight position={[-12, 24, 14]} intensity={3.8} color="#fff3d2" castShadow shadow-mapSize={[1024,1024]} />
       <CityWorld />
       <Traffic running={running} audience={audience} speedRef={speedRef} />
-      <Gates missionIndex={0} onHit={onGate} inputRef={inputRef} running={running} />
+      <Gates missionIndex={missionIndex} onHit={onGate} inputRef={inputRef} running={running} />
       <PlayerCar inputRef={inputRef} running={running} />
     </>
   );
@@ -649,18 +648,17 @@ export function PraxrefCity({
       >
         <Canvas
           shadows
-          camera={{ position: [0, 5.1, 12.8], fov: 49, near: 0.1, far: 280 }}
+          camera={{ position: [0, 3.25, 9.2], fov: 58, near: 0.1, far: 280 }}
           dpr={[1, 1.5]}
           gl={{ antialias: true, powerPreference: "high-performance" }}
-          onCreated={({ camera }) => camera.lookAt(0, 1.1, -28)}
+          onCreated={({ camera }) => camera.lookAt(0, 1.15, -34)}
         >
           <Suspense fallback={null}>
             <Scene
               audience={audience}
               running={phase === "running"}
               inputRef={inputRef}
-              onGate={onGate}
-            />
+              onGate={onGate}\n              missionIndex={missionIndex}\n            />
           </Suspense>
         </Canvas>
 
