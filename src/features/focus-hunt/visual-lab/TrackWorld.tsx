@@ -1,6 +1,7 @@
 "use client";
 
 import { useFrame } from "@react-three/fiber";
+import { useTexture } from "@react-three/drei";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import {
@@ -186,6 +187,7 @@ function TrackSegment({ index }: { index: number }) {
 
 function Gate({ at, finish = false }: { at: number; finish?: boolean }) {
   const p = trackPoint(at);
+  const praxrefLogo = useTexture("/assets/brand/logo/praxref-primary.png");
   return (
     <group position={[p.x, COURSE.deck, p.z]} rotation={[0, -p.yaw, 0]}>
       {[-5, 5].map((x) => (
@@ -205,6 +207,26 @@ function Gate({ at, finish = false }: { at: number; finish?: boolean }) {
         <boxGeometry args={[8.5, 0.12, 0.03]} />
         <meshBasicMaterial color="#31dfcd" />
       </mesh>
+      {finish && (
+        <>
+          <mesh position={[0, 6.52, 0.69]}>
+            <planeGeometry args={[5.4, 1.45]} />
+            <meshBasicMaterial
+              map={praxrefLogo}
+              transparent
+              toneMapped={false}
+            />
+          </mesh>
+          <mesh position={[0, 5.45, 0.68]}>
+            <planeGeometry args={[4.8, 0.46]} />
+            <meshBasicMaterial color="#102d41" />
+          </mesh>
+          <mesh position={[0, 5.45, 0.695]}>
+            <planeGeometry args={[3.9, 0.08]} />
+            <meshBasicMaterial color="#f7d36f" toneMapped={false} />
+          </mesh>
+        </>
+      )}
       {finish &&
         [-1, 1].map((side) => (
           <group key={side} position={[side * 5.6, 5.5, 0]}>
