@@ -4,6 +4,7 @@ import { MissionShell } from "@/features/adventure/components/mission-shell";
 import { RunnerGame } from "@/features/focus-hunt/visual-lab/RunnerGame";
 import { InhibitionGame } from "@/features/inhibition/components/inhibition-game";
 import { SelectiveAttentionGame } from "@/features/selective-attention/components/selective-attention-game";
+import { TownLab } from "@/features/selective-attention/visual-lab/TownLab";
 import { WorkingMemoryGame } from "@/features/working-memory/components/working-memory-game";
 import type { Audience } from "@/lib/audience";
 import { games } from "@/lib/demo";
@@ -18,6 +19,13 @@ export default async function AudienceGame({
     return (
       <Shell play>
         <RunnerGame audience={safeAudience} />
+      </Shell>
+    );
+  // Selective Attention now opens directly into the approved Sahil Kasabası experience.
+  if (game === "selective-attention")
+    return (
+      <Shell play>
+        <TownLab audience={safeAudience} />
       </Shell>
     );
   const current = games.find(([slug]) => slug === game) ?? games[0];
