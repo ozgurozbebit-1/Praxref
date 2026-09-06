@@ -1,7 +1,7 @@
 // Only the visual-lab route imports this course. Distances are metres, time seconds.
 export const COURSE = {
-  seconds: 54,
-  speed: 18,
+  seconds: 90,
+  speed: 10.8,
   length: 972,
   halfWidth: 4.2,
   deck: 5,
