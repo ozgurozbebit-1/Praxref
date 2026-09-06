@@ -22,11 +22,14 @@ const readMotion = () =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 export function TownLab({ audience }: { audience: "kids" | "teen" }) {
+  const teenTrialMs = 6500;
   const [state, setState] = useState<DemoState | null>(null),
     [muted, setMuted] = useState(false),
+    [remainingMs, setRemainingMs] = useState(teenTrialMs),
     [audio] = useState(createTownAudio);
   const stateRef = useRef<DemoState | null>(null),
-    next = useRef<ReturnType<typeof setTimeout> | null>(null);
+    next = useRef<ReturnType<typeof setTimeout> | null>(null),
+    deadline = useRef<number | null>(null);
   const reduced = useSyncExternalStore(subscribeMotion, readMotion, () => true);
   useEffect(
     () => () => {
@@ -35,15 +38,43 @@ export function TownLab({ audience }: { audience: "kids" | "teen" }) {
     },
     [audio],
   );
+  useEffect(() => {
+    if (audience !== "teen" || !state || state.response) return;
+    const id = window.setInterval(() => {
+      if (!deadline.current) return;
+      const left = Math.max(0, deadline.current - performance.now());
+      setRemainingMs(left);
+      if (left <= 0) {
+        deadline.current = null;
+        const current = stateRef.current;
+        if (!current || current.response) return;
+        const fresh = {
+          trial: makeDemoTrial(current.trial.id + 1),
+          score: current.score,
+          response: null,
+        };
+        stateRef.current = fresh;
+        setState(fresh);
+        deadline.current = performance.now() + teenTrialMs;
+        setRemainingMs(teenTrialMs);
+      }
+    }, 100);
+    return () => window.clearInterval(id);
+  }, [audience, state, teenTrialMs]);
   function start() {
     audio.unlock();
     const initial = { trial: makeDemoTrial(1), score: 0, response: null };
     stateRef.current = initial;
     setState(initial);
+    if (audience === "teen") {
+      deadline.current = performance.now() + teenTrialMs;
+      setRemainingMs(teenTrialMs);
+    }
   }
   function select(id: string) {
     const current = stateRef.current;
     if (!current) return;
+    deadline.current = null;
     const updated = respondDemo(current, id);
     if (updated === current) return;
     stateRef.current = updated;
@@ -57,6 +88,10 @@ export function TownLab({ audience }: { audience: "kids" | "teen" }) {
       };
       stateRef.current = fresh;
       setState(fresh);
+      if (audience === "teen") {
+        deadline.current = performance.now() + teenTrialMs;
+        setRemainingMs(teenTrialMs);
+      }
     }, 650);
   }
   // Stable synthetic preview, not a production trial and never saved as one.
@@ -79,6 +114,12 @@ export function TownLab({ audience }: { audience: "kids" | "teen" }) {
             {state?.score ?? 0}
             <small> bulundu</small>
           </span>
+          {audience === "teen" && state && (
+            <span className={styles.score} aria-label="Kalan süre">
+              {(remainingMs / 1000).toFixed(1)}
+              <small> sn</small>
+            </span>
+          )}
           <button
             type="button"
             aria-pressed={muted}
@@ -108,6 +149,7 @@ export function TownLab({ audience }: { audience: "kids" | "teen" }) {
           response={state?.response ?? null}
           onSelect={select}
           reduced={reduced}
+          audience={audience}
         />
         {!state && (
           <div className={styles.welcome}>
@@ -120,7 +162,11 @@ export function TownLab({ audience }: { audience: "kids" | "teen" }) {
             <button type="button" onClick={start}>
               Keşfe başla ↗
             </button>
-            <small>Süre baskısı yok · 16 sabit işaret</small>
+            <small>
+              {audience === "teen"
+                ? "Daha geniş alan · 6,5 sn hedef süresi · yoğun hareket"
+                : "Süre baskısı yok · 16 sabit işaret"}
+            </small>
           </div>
         )}
         {state?.response && (
