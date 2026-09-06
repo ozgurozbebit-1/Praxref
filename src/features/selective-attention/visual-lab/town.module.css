@@ -2,7 +2,8 @@
   position: fixed;
   inset: 0;
   height: 100svh;
-  display: block;
+  display: grid;
+  grid-template-rows: 62px 52px minmax(0, 1fr) 26px;
   background: #eaf2e9;
   color: #244c50;
   z-index: 90;
@@ -13,17 +14,11 @@
   box-sizing: border-box;
 }
 .lab .hud {
-  position: absolute;
-  z-index: 50;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 54px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 6px 24px;
+  padding: 8px 28px;
   height: 100%;
   width: 100%;
   max-width: none;
@@ -37,8 +32,8 @@
   color: #6b8580;
 }
 .brand h1 {
-  font-size: 20px;
-  margin: 2px 0 0;
+  font-size: 22px;
+  margin: 4px 0 0;
   letter-spacing: -0.035em;
 }
 .controls {
@@ -68,12 +63,6 @@
   font-weight: 400;
 }
 .task {
-  position: absolute;
-  z-index: 49;
-  top: 54px;
-  left: 0;
-  right: 0;
-  height: 44px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -89,22 +78,17 @@
   color: #7c927d;
 }
 .task strong {
-  font-size: 20px;
+  font-size: 22px;
   color: #284d51;
   font-weight: 600;
 }
 .stage {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  min-height: 0;
   overflow: hidden;
-  padding-top: 96px;
-  padding-bottom: 22px;
 }
 .stage canvas {
-  position: absolute !important;
-  inset: 0;
-  width: 100% !important;
-  height: 100% !important;
+  display: block;
 }
 .welcome {
   position: absolute;
@@ -195,12 +179,6 @@
   background: #f4fff2;
 }
 .footer {
-  position: absolute;
-  z-index: 50;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 22px;
   display: flex;
   align-items: center;
   justify-content: space-between;
