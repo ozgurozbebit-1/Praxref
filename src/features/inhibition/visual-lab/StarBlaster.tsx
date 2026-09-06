@@ -340,12 +340,12 @@ function Scene({
       );
     }
 
-    const spawnEvery = audience === "teen" ? 0.26 : 0.4;
+    const spawnEvery = audience === "teen" ? 0.18 : 0.4;
     if (now - s.lastSpawn >= spawnEvery) {
       s.lastSpawn = now;
       const kinds: SymbolKind[] = ["circle", "triangle", "diamond", "hex"];
       const kind: SymbolKind =
-        Math.random() < (audience === "teen" ? 0.31 : 0.36)
+        Math.random() < (audience === "teen" ? 0.29 : 0.36)
           ? "target"
           : kinds[Math.floor(Math.random() * kinds.length)];
       s.enemies.push({
@@ -354,8 +354,8 @@ function Scene({
         x: (Math.random() - 0.5) * 13.8,
         y: 9.4 + Math.random() * 2.3,
         z: -0.4 - Math.random() * 1.6,
-        vx: (Math.random() - 0.5) * (audience === "teen" ? 3.2 : 2.2),
-        vy: -(audience === "teen" ? 4.5 + Math.random() * 1.5 : 3.35 + Math.random() * 1.15),
+        vx: (Math.random() - 0.5) * (audience === "teen" ? 4.0 : 2.2),
+        vy: -(audience === "teen" ? 5.6 + Math.random() * 1.9 : 3.35 + Math.random() * 1.15),
         spin: (Math.random() - 0.5) * 2.6,
         scale: 0.82 + Math.random() * 0.32,
       });
