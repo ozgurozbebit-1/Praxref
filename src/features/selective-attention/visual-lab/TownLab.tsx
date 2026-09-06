@@ -160,7 +160,17 @@ export function TownLab({ audience }: { audience: "kids" | "teen" }) {
           >
             {muted ? "Ses kapalı" : "Ses açık"}
           </button>
-          <Link href={`/play/${audience}`}>Çıkış ↗</Link>
+          <button
+            type="button"
+            onClick={() => {
+              sessionDeadline.current = null;
+              deadline.current = null;
+              if (next.current) clearTimeout(next.current);
+              window.location.assign(`/play/${audience}`);
+            }}
+          >
+            Çıkış ↗
+          </button>
         </div>
       </header>
       <div className={styles.task}>
@@ -203,7 +213,12 @@ export function TownLab({ audience }: { audience: "kids" | "teen" }) {
             <h2>{state.score} puan</h2>
             <p>90 saniyelik Sahil Kasabası oturumu tamamlandı.</p>
             <button type="button" onClick={start}>Yeniden oyna</button>
-            <Link href={`/play/${audience}`}>Oyun merkezine dön</Link>
+            <button
+              type="button"
+              onClick={() => window.location.assign(`/play/${audience}`)}
+            >
+              Oyun merkezine dön
+            </button>
           </div>
         )}
         {!finished && state?.response && (
