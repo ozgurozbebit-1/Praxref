@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { StatisticsReset } from "@/components/statistics-reset";
 
 export const metadata: Metadata = {
   title: "PRAXREF | Dikkat ve Bilişsel Beceriler",
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="tr">
-      <body>{children}</body>
+      <body><StatisticsReset />{children}</body>
     </html>
   );
 }
