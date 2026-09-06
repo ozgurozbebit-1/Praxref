@@ -20,9 +20,11 @@ export const COURSE_SECTIONS = [
   { name: "Atlas bitiş kapısı", kind: "finish" },
 ] as const;
 export const RAMPS = [
-  { start: 218, crest: 244, land: 264, rise: 3, launch: 12 },
-  { start: 542, crest: 568, land: 590, rise: 4, launch: 14 },
-  { start: 758, crest: 782, land: 804, rise: 3.6, launch: 13.5 },
+  // Launch velocities are tuned for the 90 s / 10.8 m·s⁻¹ course pace so
+  // the ship clears each water gap and lands on the far deck without dipping.
+  { start: 218, crest: 244, land: 264, rise: 3, launch: 18.8 },
+  { start: 542, crest: 568, land: 590, rise: 4, launch: 20.5 },
+  { start: 758, crest: 782, land: 804, rise: 3.6, launch: 20.7 },
 ] as const;
 
 const clamp = (value: number, low: number, high: number) =>
