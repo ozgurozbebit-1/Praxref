@@ -1,10 +1,68 @@
 "use client";
-import { useEffect, useMemo, useState } from "react"; import { Card, TrendIndicator } from "@/components/ui"; import { createRuleBasedSummary } from "@/lib/clinical-summary/rule-based-summary"; import { getLatestDomainScores, getRecentUnifiedSessions } from "@/lib/session-store/unified-session-store"; import type { CognitiveDomainScore } from "@/lib/protocol/cognitive-domain";
-const labels = { sustainedAttention: "Odak Sürekliliği", selectiveAttention: "Seçici Dikkat", inhibition: "İnhibisyon Kontrolü", workingMemory: "Çalışma Belleği" };
-const emptyScores: CognitiveDomainScore[] = [
-  { domain: "sustainedAttention", score: null, confidence: "insufficient", trialCount: 0, validTrialCount: 0, lastUpdated: null, trend: "insufficient-data", dataQuality: [], audience: "kids" },
-  { domain: "selectiveAttention", score: null, confidence: "insufficient", trialCount: 0, validTrialCount: 0, lastUpdated: null, trend: "insufficient-data", dataQuality: [], audience: "kids" },
-  { domain: "inhibition", score: null, confidence: "insufficient", trialCount: 0, validTrialCount: 0, lastUpdated: null, trend: "insufficient-data", dataQuality: [], audience: "kids" },
-  { domain: "workingMemory", score: null, confidence: "insufficient", trialCount: 0, validTrialCount: 0, lastUpdated: null, trend: "insufficient-data", dataQuality: [], audience: "kids" },
-];
-export function CognitiveProfile() { const [audience, setAudience] = useState<"kids" | "teen">("kids"), [scores, setScores] = useState<CognitiveDomainScore[]>(emptyScores), [sessions, setSessions] = useState<ReturnType<typeof getRecentUnifiedSessions>>([]); useEffect(() => { const next = getLatestDomainScores(audience), hasData = next.some(score => score.score !== null); setScores(hasData ? next : emptyScores.map(score => ({ ...score, audience }))); setSessions(getRecentUnifiedSessions().filter(session => session.audience === audience).slice(0, 4)); }, [audience]); const summary = useMemo(() => createRuleBasedSummary(scores), [scores]); return <section className="cognitive-profile"><div className="profile-heading"><div><p className="eyebrow">PRAXREF Bilişsel Profil</p><h2>Yeni Profil</h2><p className="muted">Yeni oturumlar tamamlandıkça profil oluşur</p></div><div className="profile-filter" aria-label="Yaş segmenti filtresi"><button className={audience === "kids" ? "is-active" : ""} onClick={() => setAudience("kids")}>Kids</button><button className={audience === "teen" ? "is-active" : ""} onClick={() => setAudience("teen")}>Teen</button></div></div><div className="domain-grid">{scores.map(score => <Card key={score.domain} className="domain-card"><p>{labels[score.domain]}</p><strong>{score.score ?? "—"}</strong><span>{score.confidence === "insufficient" ? "Yetersiz veri" : `${score.confidence} güven`}</span><TrendIndicator label={score.trend === "insufficient-data" ? "Veri yok" : score.trend === "improving" ? "Yükseliyor" : score.trend === "declining" ? "Değişken" : "Stabil"} direction={score.trend === "improving" ? "up" : score.trend === "declining" ? "down" : "flat"} />{score.dataQuality.length > 0 && <small>Veri kalitesi uyarısı</small>}</Card>)}</div><Card className="profile-summary"><h3>Ölçülen oyun performansı özeti</h3>{summary.map(line => <p key={line}>{line}</p>)}</Card><Card className="recent-unified"><h3>Son 4 oyun oturumu</h3>{sessions.length ? sessions.map(session => <div key={session.sessionId}><span>{labels[session.domain]}</span><b>{session.score ?? "—"}</b><small>{session.audience === "kids" ? "Kids" : "Teen"} · yerel veri</small></div>) : <p>Henüz tamamlanan yerel oturum yok.</p>}</Card></section>; }
+
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { Card } from "@/components/ui";
+import { buildCognitiveProfile } from "@/lib/cognitive-profile/profile-engine";
+
+export function CognitiveProfile() {
+  const [version, setVersion] = useState(0);
+  const report = useMemo(() => buildCognitiveProfile(), [version]);
+
+  useEffect(() => {
+    const refresh = () => setVersion((value) => value + 1);
+    window.addEventListener("focus", refresh);
+    window.addEventListener("storage", refresh);
+    return () => {
+      window.removeEventListener("focus", refresh);
+      window.removeEventListener("storage", refresh);
+    };
+  }, []);
+
+  return (
+    <section className="cognitive-profile">
+      <div className="profile-heading">
+        <div>
+          <p className="eyebrow">PRAXREF Bilişsel Profil</p>
+          <h2>{report.domains.length} alanlı profil</h2>
+          <p className="muted">
+            Oyun oturumları tamamlandıkça dikkat, inhibisyon, hız ve karar verme
+            alanları birleşir.
+          </p>
+        </div>
+      </div>
+
+      <div className="domain-grid">
+        {report.domains.map((domain) => (
+          <Card key={domain.key} className="domain-card">
+            <p>{domain.label}</p>
+            <strong>{domain.score ?? "—"}</strong>
+            <span>
+              {domain.status === "ready"
+                ? "Profil hazır"
+                : domain.status === "limited"
+                  ? "Sınırlı veri"
+                  : "Veri bekleniyor"}
+            </span>
+            <small>{domain.sourceGames.join(" · ")}</small>
+          </Card>
+        ))}
+      </div>
+
+      <Card className="profile-summary">
+        <h3>Genel profil</h3>
+        <p>
+          {report.overallScore === null
+            ? `Şu anda ${report.availableDomainCount}/${report.domains.length} alanda veri var. Genel skor için ölçüm verisi bekleniyor.`
+            : `Mevcut ${report.availableDomainCount}/${report.domains.length} alanın oyun-içi ortalama profil skoru ${report.overallScore}/100.`}
+        </p>
+        <p>
+          Bu skorlar klinik norm değildir; oyun-içi performans göstergeleridir.
+        </p>
+        <Link className="button button--secondary" href="/profile">
+          Ayrıntılı raporu aç / yazdır →
+        </Link>
+      </Card>
+    </section>
+  );
+}
