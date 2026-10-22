@@ -38,7 +38,8 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 domains.forEach(d=>state[d.id]={answers:{},seconds:null,errors:null,notes:""});
 function selected(d,i,v){state[d.id].answers[i]=v;render();}
-function stopTimer(){if(running){elapsed+=(performance.now()-started)/1000;running=false;clearInterval(tick);tick=null;} }\nfunction persistTimer(){if(running){stopTimer();const d=domains[active];if(d.timer)state[d.id].seconds=Number(elapsed.toFixed(1));}}
+function stopTimer(){if(running){elapsed+=(performance.now()-started)/1000;running=false;clearInterval(tick);tick=null;} }
+function persistTimer(){if(running){stopTimer();const d=domains[active];if(d.timer)state[d.id].seconds=Number(elapsed.toFixed(1));}}
 function clockDisplay(){const el=$("clock");if(el)el.textContent=(elapsed+(running?(performance.now()-started)/1000:0)).toFixed(1)+" sn";}
 function render(){const d=domains[active],s=state[d.id];$('tabs').innerHTML=domains.map((x,i)=>'<button class="'+(i===active?'active':'')+'" data-index="'+i+'">'+(i+1)+'. '+esc(x.name)+'</button>').join('');$('tabs').querySelectorAll("button").forEach(b=>b.onclick=()=>{persistTimer();active=Number(b.dataset.index);render()});$('domain-title').textContent=d.name;$('domain-info').textContent=d.info;
 let html="";if(d.stimulus)html+='<div class="stimulus" style="white-space:pre-line">'+esc(d.stimulus)+'</div>';
